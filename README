@@ -1,0 +1,3 @@
+Program using Emotiv Epoc consumer EEG headset to record emotional responses to music and recommend new responces.
+
+Needs QT libraries 4.8.2
