@@ -16,14 +16,16 @@ TEMPLATE = app
 SOURCES += main.cpp\
         mainw.cpp \
     headset.cpp \
-    database.cpp
+    database.cpp \
+    meexception.cpp
 
 HEADERS  += mainw.h \
     headset.h \
     EmoStateDLL.h \
     edkErrorCode.h \
     edk.h \
-    database.h
+    database.h \
+    meexception.h
 
 FORMS    += mainw.ui
 

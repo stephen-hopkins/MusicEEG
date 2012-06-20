@@ -13,7 +13,7 @@ class MainW : public QMainWindow
     Q_OBJECT
     
 public:
-    explicit MainW(QWidget *parent = 0);
+    explicit MainW(Headset*, QWidget *parent = 0);
     ~MainW();
     
 

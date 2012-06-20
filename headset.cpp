@@ -1,14 +1,16 @@
 #include "headset.h"
 #include <iostream>
 #include "windows.h"
+#include "meexception.h"
 
 using namespace std;
 
-Headset::Headset()
+Headset::Headset(Database* d)
 {
     if (EE_EngineConnect() != EDK_OK)
         cerr << "Emotiv Engine start up failed";
     trackPlaying = true;
+    database = d;
 }
 
 Headset::~Headset()
@@ -18,10 +20,16 @@ Headset::~Headset()
 
 void Headset::run()
 {
+    // initialise values;
     EmoEngineEventHandle event = EE_EmoEngineEventCreate();
     EmoStateHandle emoState	= EE_EmoStateCreate();
     unsigned int userID = 0;
     trackPlaying  = true;
+    engagement.clear();
+    excitementST.clear();
+    excitementLT.clear();
+    frustration.clear();
+    meditation.clear();
 
     while (trackPlaying) {
 
@@ -41,11 +49,12 @@ void Headset::run()
             }
         }
         else if (state != EDK_NO_EVENT) {
-            cerr << "Internal error in Emotiv Engine!" << endl;
-            break;
+            throw MeException("Internal error in Emotiv Engine!");
         }
-        Sleep(1000);
+        sleep(1);
     }
+
+    database->newUserTrack(user, artist, track, engagement, excitementST, excitementLT, frustration, meditation);
 
     EE_EmoStateFree(emoState);
     EE_EmoEngineEventFree(event);
@@ -63,7 +72,8 @@ void Headset::logEmoState(EmoStateHandle emoState)
     return;
 }
 
-void Headset::trackFinished() {
+void Headset::trackFinished()
+{
     trackPlaying = false;
 }
 
@@ -73,3 +83,4 @@ void Headset::setUserArtistTrack(QString u, QString a, QString t)
     artist = a;
     track = t;
 }
+

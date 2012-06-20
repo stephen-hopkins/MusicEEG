@@ -2,6 +2,8 @@
 #include <QSqlQuery>
 #include <QSqlRecord>
 #include <iostream>
+#include "meexception.h"
+#include <QVariant>
 
 using namespace std;
 
@@ -9,11 +11,15 @@ Database::Database()
 {
     db = QSqlDatabase::addDatabase("QSQLITE");
     db.setDatabaseName("Profiles.sqlite");
-    db.open();
+
+    if (!db.open()) {
+        throw MeException("Error opening database");
+    }
+
     if (!dbInitialised()) {
         QSqlQuery init(db);
         if (!init.exec("CREATE TABLE UserTracks(UTid integer primary key autoincrement, User text, Artist text, Album text, Length integer)")) {
-            cerr << "Error initialising database";
+            throw MeException("Error creating initial table in database");
         }
     }
 }
@@ -33,3 +39,41 @@ bool Database::dbInitialised()
         return true;
     }
 }
+
+void Database::newUserTrack(QString user, QString artist, QString track,
+                            QList<float> engagement, QList<float> excitementST, QList<float> excitementLT, QList<float> frustration, QList<float> meditation  )
+{
+    // test that all lists of equal length
+    int length = (engagement.size() + excitementST.size() + excitementLT.size() + frustration.size() + meditation.size()) / 5;
+    if (length != engagement.size()) {
+        throw MeException("Emotion lists not of equal size");
+    }
+
+    // Add entry into main table UserTracks
+    QSqlQuery addData(db);
+    addData.prepare(QString("INSERT INTO UserTracks (NULL, '%1', '%2', '%3', '%4')").arg(user).arg(artist).arg(track).arg(length));
+    if (!addData.exec()) {
+        throw MeException("Error adding new UserTrack to database");
+    }
+    QString utID = addData.lastInsertId().toString();
+
+    // Create new table to hold emotion data
+    addData.prepare(QString("CREATE TABLE '%1'(Second integer primary key autoincrement, Engagement real, ExcitementST real, ExcitementLT real, Frustration real, Meditation real)").arg(utID));
+    if (!addData.exec()) {
+        throw MeException("Error adding new table to hold emotion data");
+    }
+
+    // add rows to table
+    addData.prepare("INSERT INTO '%1' (NULL, :engagement, :excitementST, :excitementLT, :frustration, :meditation)");
+    while (!engagement.isEmpty()) {
+        addData.bindValue(":engagement", engagement.takeFirst());
+        addData.bindValue(":excitementST", excitementST.takeFirst());
+        addData.bindValue(":excitementLT", excitementLT.takeFirst());
+        addData.bindValue(":frustration", frustration.takeFirst());
+        addData.bindValue(":meditation", meditation.takeFirst());
+        addData.exec();
+    }
+    return;
+}
+
+

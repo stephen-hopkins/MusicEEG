@@ -5,18 +5,19 @@
 #include "edk.h"
 #include <QList>
 #include <QString>
+#include "database.h"
 
 class Headset : public QThread
 {
-
 public:
-    Headset();
+    Headset(Database*);
     ~Headset();
     void run();
     void trackFinished();
     void setUserArtistTrack(QString, QString, QString);
 
 private:
+    Database* database;
     QString user;
     QString artist;
     QString track;
