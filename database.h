@@ -3,13 +3,19 @@
 
 #include <QSqlDatabase>
 #include <QList>
+#include <QObject>
 
-class Database
+class Database : public QObject
 {
+    Q_OBJECT
+
 public:
     Database();
     ~Database();
-    void newUserTrack (QString, QString, QString,
+
+public slots:
+
+    void saveUserTrack (QString, QString, QString,
                       QList<float>, QList<float>, QList<float>, QList<float>, QList<float>);
 
 private:

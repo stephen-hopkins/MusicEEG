@@ -1,23 +1,29 @@
 #ifndef HEADSET_H
 #define HEADSET_H
 
-#include <QThread>
+#include <QObject>
 #include "edk.h"
 #include <QList>
 #include <QString>
-#include "database.h"
 
-class Headset : public QThread
+class Headset : public QObject
 {
+    Q_OBJECT
 public:
-    Headset(Database*);
+    Headset();
     ~Headset();
-    void run();
-    void trackFinished();
-    void setUserArtistTrack(QString, QString, QString);
+
+public slots:
+    void initialise(QString u, QString a, QString t);
+    void logEmoState();
+    void writeData();
+    void discardData();
+
+signals:
+    void newUserTrack(QString user, QString artist, QString track,
+                 QList<float> engagement, QList<float> excitementST, QList<float> excitementLT, QList<float> frustration, QList<float> meditation);
 
 private:
-    Database* database;
     QString user;
     QString artist;
     QString track;
@@ -26,6 +32,10 @@ private:
     QList<float> excitementLT;
     QList<float> frustration;
     QList<float> meditation;
+
+    EmoEngineEventHandle event;
+    EmoStateHandle emoState;
+    unsigned int userID;
 
     bool trackPlaying;
     void logEmoState(EmoStateHandle);

@@ -4,6 +4,7 @@
 #include <iostream>
 #include "meexception.h"
 #include <QVariant>
+#include <QString>
 
 using namespace std;
 
@@ -13,13 +14,13 @@ Database::Database()
     db.setDatabaseName("Profiles.sqlite");
 
     if (!db.open()) {
-        throw MeException("Error opening database");
+        cerr << "Error opening database";
     }
 
     if (!dbInitialised()) {
         QSqlQuery init(db);
         if (!init.exec("CREATE TABLE UserTracks(UTid integer primary key autoincrement, User text, Artist text, Album text, Length integer)")) {
-            throw MeException("Error creating initial table in database");
+            cerr << "Error creating initial table in database";
         }
     }
 }
@@ -40,27 +41,29 @@ bool Database::dbInitialised()
     }
 }
 
-void Database::newUserTrack(QString user, QString artist, QString track,
-                            QList<float> engagement, QList<float> excitementST, QList<float> excitementLT, QList<float> frustration, QList<float> meditation  )
+void Database::saveUserTrack(QString user, QString artist, QString track,
+                            QList<float> engagement, QList<float> excitementST, QList<float> excitementLT, QList<float> frustration, QList<float> meditation)
 {
     // test that all lists of equal length
     int length = (engagement.size() + excitementST.size() + excitementLT.size() + frustration.size() + meditation.size()) / 5;
     if (length != engagement.size()) {
-        throw MeException("Emotion lists not of equal size");
+        cerr << "Emotion lists not of equal size";
     }
 
     // Add entry into main table UserTracks
     QSqlQuery addData(db);
-    addData.prepare(QString("INSERT INTO UserTracks (NULL, '%1', '%2', '%3', '%4')").arg(user).arg(artist).arg(track).arg(length));
+    QString hello = QString("INSERT INTO UserTracks VALUES(NULL, '%1', '%2', '%3', '%4')").arg(user).arg(artist).arg(track).arg(length);
+    cout << hello.toStdString();
+    addData.prepare(QString("INSERT INTO UserTracks VALUES(NULL, '%1', '%2', '%3', '%4')").arg(user).arg(artist).arg(track).arg(length));
     if (!addData.exec()) {
-        throw MeException("Error adding new UserTrack to database");
+        cerr << "Error adding new UserTrack to database";
     }
     QString utID = addData.lastInsertId().toString();
 
     // Create new table to hold emotion data
     addData.prepare(QString("CREATE TABLE '%1'(Second integer primary key autoincrement, Engagement real, ExcitementST real, ExcitementLT real, Frustration real, Meditation real)").arg(utID));
     if (!addData.exec()) {
-        throw MeException("Error adding new table to hold emotion data");
+        cerr << "Error adding new table to hold emotion data";
     }
 
     // add rows to table

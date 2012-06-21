@@ -1,11 +1,15 @@
 #include "mainw.h"
 #include "ui_mainw.h"
+#include "meexception.h"
+#include <iostream>
 
-MainW::MainW(Headset* h, QWidget *parent) :
-    headset(h), QMainWindow(parent),
+MainW::MainW(QWidget *parent) :
+    QMainWindow(parent),
     ui(new Ui::MainW)
 {
     ui->setupUi(this);
+    QObject::connect(&headsetTimer, SIGNAL(timeout()),
+                     this, SIGNAL(logEmoState()));
 }
 
 MainW::~MainW()
@@ -16,11 +20,16 @@ MainW::~MainW()
 
 void MainW::on_startButton_clicked()
 {
-    headset->setUserArtistTrack("Steve", "The XX", "Hello");
-    headset->start();
+     emit startRecording("Steve", "The XX", "Hello");
+     emit logEmoState();
+     headsetTimer.start(1000);
+     return;
 }
 
 void MainW::on_stopButton_clicked()
 {
-    headset->trackFinished();
+    headsetTimer.stop();
+    emit stopRecording();
 }
+
+
