@@ -61,20 +61,21 @@ void Database::saveUserTrack(QString user, QString artist, QString track,
     QString utID = addData.lastInsertId().toString();
 
     // Create new table to hold emotion data
-    addData.prepare(QString("CREATE TABLE '%1'(Second integer primary key autoincrement, Engagement real, ExcitementST real, ExcitementLT real, Frustration real, Meditation real)").arg(utID));
+    addData.prepare(QString("CREATE TABLE UTid%1(Second integer primary key autoincrement, Engagement real, ExcitementST real, ExcitementLT real, Frustration real, Meditation real)").arg(utID));
     if (!addData.exec()) {
         cerr << "Error adding new table to hold emotion data";
     }
 
-    // add rows to table
-    addData.prepare("INSERT INTO '%1' (NULL, :engagement, :excitementST, :excitementLT, :frustration, :meditation)");
+    addData.prepare(QString("INSERT INTO UTid%1 VALUES(NULL, :engagement, :excitementST, :excitementLT, :frustration, :meditation)").arg(utID));
     while (!engagement.isEmpty()) {
         addData.bindValue(":engagement", engagement.takeFirst());
         addData.bindValue(":excitementST", excitementST.takeFirst());
         addData.bindValue(":excitementLT", excitementLT.takeFirst());
         addData.bindValue(":frustration", frustration.takeFirst());
         addData.bindValue(":meditation", meditation.takeFirst());
-        addData.exec();
+        if (!addData.exec()) {
+            cerr << "Error adding record to UTid table" << endl;
+        }
     }
     return;
 }
