@@ -19,7 +19,7 @@ Database::Database()
 
     if (!dbInitialised()) {
         QSqlQuery init(db);
-        if (!init.exec("CREATE TABLE UserTracks(UTid integer primary key autoincrement, User text, Artist text, Album text, Length integer)")) {
+        if (!init.exec("CREATE TABLE UserTracks(UTid integer primary key autoincrement, User text, Artist text, Track text, Length integer)")) {
             cerr << "Error creating initial table in database";
         }
     }

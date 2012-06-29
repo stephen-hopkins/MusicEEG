@@ -46,7 +46,7 @@ void Headset::logEmoState()
         if (eventType == EE_EmoStateUpdated) {
             EE_EmoEngineEventGetEmoState(event, emoState);
             const float timestamp = ES_GetTimeFromStart(emoState);
-            cout << "New EmoState from user" << timestamp << userID << endl;
+            cout << "New EmoState from user" << timestamp << " " << userID << endl;
             engagement << ES_AffectivGetEngagementBoredomScore(emoState);
             excitementST << ES_AffectivGetExcitementShortTermScore(emoState);
             excitementLT << ES_AffectivGetExcitementLongTermScore(emoState);

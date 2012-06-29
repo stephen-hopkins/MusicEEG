@@ -6,21 +6,52 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>400</width>
-    <height>300</height>
+    <width>831</width>
+    <height>643</height>
    </rect>
+  </property>
+  <property name="sizePolicy">
+   <sizepolicy hsizetype="Expanding" vsizetype="Preferred">
+    <horstretch>0</horstretch>
+    <verstretch>0</verstretch>
+   </sizepolicy>
   </property>
   <property name="windowTitle">
    <string>MainW</string>
   </property>
   <widget class="QWidget" name="centralWidget">
-   <widget class="QWidget" name="horizontalLayoutWidget">
+   <widget class="QWidget" name="layoutWidget">
     <property name="geometry">
      <rect>
-      <x>130</x>
-      <y>60</y>
-      <width>160</width>
-      <height>80</height>
+      <x>220</x>
+      <y>320</y>
+      <width>272</width>
+      <height>25</height>
+     </rect>
+    </property>
+    <layout class="QHBoxLayout" name="horizontalLayout_2">
+     <item>
+      <widget class="QLCDNumber" name="timeLcd"/>
+     </item>
+     <item>
+      <widget class="Phonon::VolumeSlider" name="volumeSlider" native="true">
+       <property name="sizePolicy">
+        <sizepolicy hsizetype="Expanding" vsizetype="Preferred">
+         <horstretch>0</horstretch>
+         <verstretch>0</verstretch>
+        </sizepolicy>
+       </property>
+      </widget>
+     </item>
+    </layout>
+   </widget>
+   <widget class="QWidget" name="layoutWidget">
+    <property name="geometry">
+     <rect>
+      <x>230</x>
+      <y>240</y>
+      <width>272</width>
+      <height>26</height>
      </rect>
     </property>
     <layout class="QHBoxLayout" name="horizontalLayout">
@@ -28,6 +59,11 @@
       <widget class="QPushButton" name="startButton">
        <property name="text">
         <string>Start</string>
+       </property>
+       <property name="icon">
+        <iconset theme="media-playback-start">
+         <normaloff/>
+        </iconset>
        </property>
       </widget>
      </item>
@@ -40,16 +76,69 @@
      </item>
     </layout>
    </widget>
+   <widget class="QTableWidget" name="musicTable">
+    <property name="geometry">
+     <rect>
+      <x>170</x>
+      <y>60</y>
+      <width>401</width>
+      <height>151</height>
+     </rect>
+    </property>
+    <property name="autoScroll">
+     <bool>true</bool>
+    </property>
+    <property name="selectionMode">
+     <enum>QAbstractItemView::SingleSelection</enum>
+    </property>
+    <property name="selectionBehavior">
+     <enum>QAbstractItemView::SelectRows</enum>
+    </property>
+    <property name="columnCount">
+     <number>4</number>
+    </property>
+    <column/>
+    <column/>
+    <column/>
+    <column/>
+   </widget>
+   <widget class="QLineEdit" name="lineEdit">
+    <property name="geometry">
+     <rect>
+      <x>380</x>
+      <y>420</y>
+      <width>113</width>
+      <height>20</height>
+     </rect>
+    </property>
+   </widget>
   </widget>
   <widget class="QMenuBar" name="menuBar">
    <property name="geometry">
     <rect>
      <x>0</x>
      <y>0</y>
-     <width>400</width>
+     <width>831</width>
      <height>21</height>
     </rect>
    </property>
+   <widget class="QMenu" name="menuFile">
+    <property name="title">
+     <string>File</string>
+    </property>
+    <addaction name="actionAddFiles"/>
+    <addaction name="separator"/>
+    <addaction name="actionExit"/>
+   </widget>
+   <widget class="QMenu" name="menuAbout">
+    <property name="title">
+     <string>About</string>
+    </property>
+    <addaction name="actionAbout"/>
+    <addaction name="actionAboutQT"/>
+   </widget>
+   <addaction name="menuFile"/>
+   <addaction name="menuAbout"/>
   </widget>
   <widget class="QToolBar" name="mainToolBar">
    <attribute name="toolBarArea">
@@ -58,10 +147,75 @@
    <attribute name="toolBarBreak">
     <bool>false</bool>
    </attribute>
+   <addaction name="actionPlay"/>
+   <addaction name="actionStop"/>
   </widget>
   <widget class="QStatusBar" name="statusBar"/>
+  <action name="actionPlay">
+   <property name="text">
+    <string>play</string>
+   </property>
+   <property name="toolTip">
+    <string>Play track</string>
+   </property>
+  </action>
+  <action name="actionStop">
+   <property name="text">
+    <string>stop</string>
+   </property>
+   <property name="toolTip">
+    <string>Stop Music</string>
+   </property>
+  </action>
+  <action name="actionNext">
+   <property name="text">
+    <string>next</string>
+   </property>
+   <property name="toolTip">
+    <string>Next Track</string>
+   </property>
+  </action>
+  <action name="actionAddFiles">
+   <property name="text">
+    <string>addFiles</string>
+   </property>
+   <property name="toolTip">
+    <string>Add Tracks</string>
+   </property>
+  </action>
+  <action name="actionExit">
+   <property name="text">
+    <string>exit</string>
+   </property>
+   <property name="toolTip">
+    <string>Exit</string>
+   </property>
+  </action>
+  <action name="actionAbout">
+   <property name="text">
+    <string>about</string>
+   </property>
+   <property name="toolTip">
+    <string>About MusicEEG</string>
+   </property>
+  </action>
+  <action name="actionAboutQT">
+   <property name="text">
+    <string>aboutQT</string>
+   </property>
+   <property name="toolTip">
+    <string>About QT</string>
+   </property>
+  </action>
  </widget>
  <layoutdefault spacing="6" margin="11"/>
+ <customwidgets>
+  <customwidget>
+   <class>Phonon::VolumeSlider</class>
+   <extends>QWidget</extends>
+   <header location="global">phonon/volumeslider.h</header>
+  </customwidget>
+ </customwidgets>
  <resources/>
  <connections/>
 </ui>
