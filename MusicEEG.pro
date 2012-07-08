@@ -30,11 +30,11 @@ HEADERS  += mainw.h \
 
 FORMS    += mainw.ui
 
-win32: LIBS += -L$$PWD/../../Steve/EEG/ -ledk
-win32: LIBS += -L$$PWD/../../Steve/EEG/ -ledk_utils
+win32: LIBS += -L$$PWD/../Emotiv/ -ledk
+win32: LIBS += -L$$PWD/../Emotiv/ -ledk_utils
 
-INCLUDEPATH += $$PWD/../../Steve/EEG
-DEPENDPATH += $$PWD/../../Steve/EEG
+INCLUDEPATH += $$PWD/../Emotiv
+DEPENDPATH += $$PWD/../Emotiv
 
 
 
