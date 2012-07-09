@@ -5,11 +5,8 @@
 #include <QTGui>
 #include "headset.h"
 #include <QTimer>
-#include <phonon/audiooutput.h>
-#include <phonon/seekslider.h>
-#include <phonon/mediaobject.h>
 #include <phonon/volumeslider.h>
-#include <phonon/backendcapabilities.h>
+#include <phonon/MediaSource>
 #include <QList>
 
 namespace Ui {
@@ -25,44 +22,45 @@ public:
     ~MainW();
     
 private slots:
-    // these 2 are for 2 buttons, will be got rid of
-    void on_startButton_clicked();
-    void on_stopButton_clicked();
 
-    // handling headset
-    void trackStarted();
-    void trackFinished();
+    void startButtonPressed();
+    void stopButtonPressed();
+    void startTrack();
 
     // music player
     void addFiles();
     void about();
-    void stateChanged(Phonon::State newState, Phonon::State oldState);
-    void tick(qint64 time);
-    void sourceChanged(const Phonon::MediaSource &source);
-    void metaStateChanged(Phonon::State newState, Phonon::State oldState);
-    void aboutToFinish();
     void tableClicked(int row, int column);
+    void updateTable(QList<QStringList>);
+
+public slots:
+    void tick(qint64 time);
+    void trackFinished();
 
 signals:
     // handles headset/database
     void startRecording(QString, QString, QString);
     void logEmoState();
     void stopRecording();
+    void cancelRecording();
+
+    // goes to mediaplayer
+    void startPlaying(Phonon::MediaSource);
+    void stopPlaying();
+    void newSourceList(QList<Phonon::MediaSource>);
 
 private:
     Ui::MainW *ui;
 
-    //  used for headset
-    QTimer* headsetTimer;
-    QString user;
-    QString artist;
-    QString track;
+    //  used to logEmoState every second for headset
+    QTimer* recurringTimer;
+    QTimer* singleShotTimer;
+
+    // track being played
+    int currentTrack;
 
     // used for mediaplayer
     Phonon::SeekSlider *seekSlider;
-    Phonon::MediaObject *mediaObject;
-    Phonon::MediaObject *metaInformationResolver;
-    Phonon::AudioOutput *audioOutput;
     QList<Phonon::MediaSource> sources;
 
     void setupActions();

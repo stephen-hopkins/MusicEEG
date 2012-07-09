@@ -1,7 +1,6 @@
 #include "headset.h"
 #include <iostream>
 #include "windows.h"
-#include "meexception.h"
 #include <QCoreApplication>
 
 using namespace std;

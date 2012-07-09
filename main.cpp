@@ -4,7 +4,6 @@
 #include "headset.h"
 #include "windows.h"
 #include "database.h"
-#include "meexception.h"
 #include <QMetaType>
 
 Q_DECLARE_METATYPE(QList<float>)
@@ -27,6 +26,8 @@ int main(int argc, char *argv[])
                      &headset, SLOT(logEmoState()));
     QObject::connect(&w, SIGNAL(stopRecording()),
                      &headset, SLOT(writeData()));
+    QObject::connect(&w, SIGNAL(cancelRecording()),
+                     &headset, SLOT(discardData()));
 
     QObject::connect(&headset, SIGNAL(newUserTrack(QString,QString,QString,QList<float>,QList<float>,QList<float>,QList<float>,QList<float>)),
                      &database, SLOT(saveUserTrack(QString,QString,QString,QList<float>,QList<float>,QList<float>,QList<float>,QList<float>)), Qt::QueuedConnection);

@@ -18,7 +18,7 @@ SOURCES += main.cpp\
         mainw.cpp \
     headset.cpp \
     database.cpp \
-    meexception.cpp
+    musicplayer.cpp
 
 HEADERS  += mainw.h \
     headset.h \
@@ -26,7 +26,7 @@ HEADERS  += mainw.h \
     edkErrorCode.h \
     edk.h \
     database.h \
-    meexception.h
+    musicplayer.h
 
 FORMS    += mainw.ui
 

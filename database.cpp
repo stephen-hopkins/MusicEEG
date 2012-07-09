@@ -2,7 +2,6 @@
 #include <QSqlQuery>
 #include <QSqlRecord>
 #include <iostream>
-#include "meexception.h"
 #include <QVariant>
 #include <QString>
 
