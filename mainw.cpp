@@ -2,6 +2,8 @@
 #include "ui_mainw.h"
 #include <iostream>
 
+using namespace std;
+
 MainW::MainW(QWidget *parent) :
     QMainWindow(parent),
     ui(new Ui::MainW)
@@ -9,24 +11,24 @@ MainW::MainW(QWidget *parent) :
     ui->setupUi(this);
     user = "Steve";
 
-    recurringTimer = new QTimer();
-    singleShotTimer = new QTimer();
-    singleShotTimer->setSingleShot(true);
-    connect(recurringTimer, SIGNAL(timeout()),
+    headsetTimer = new QTimer();
+    delayTrackPlayTimer = new QTimer();
+    delayTrackPlayTimer->setSingleShot(true);
+    connect(headsetTimer, SIGNAL(timeout()),
                      this, SIGNAL(logEmoState()));
-    connect(singleShotTimer, SIGNAL(timeout()),
+    connect(delayTrackPlayTimer, SIGNAL(timeout()),
             this, SLOT(startTrack()));
 
     setupActions();
     ui->timeLcd->display("00:00");
     currentTrack = 0;
-
 }
 
 MainW::~MainW()
 {
     delete ui;
-    delete recurringTimer;
+    delete headsetTimer;
+    delete delayTrackPlayTimer;
 }
 
 void MainW::addFiles()
@@ -37,7 +39,6 @@ void MainW::addFiles()
      if (files.isEmpty())
          return;
 
-     int index = sources.size();
      foreach (QString string, files) {
              Phonon::MediaSource source(string);
 
@@ -71,10 +72,8 @@ void MainW::tableClicked(int row, int /* column */)
 
      ui->musicTable->selectRow(row);
      ui->timeLcd->display("00:00");
-
      currentTrack = row;
-     emit startButtonPressed(sources[row]);
-
+     emit startButtonPressed();
  }
 
 void MainW::setupActions()
@@ -86,7 +85,7 @@ void MainW::setupActions()
     connect(ui->actionPlay, SIGNAL(triggered()),
             this, SLOT(startButtonPressed()));
     connect(ui->actionStop, SIGNAL(triggered()),
-            this, SLOT(stopButtonPressed));
+            this, SLOT(stopButtonPressed()));
     connect(ui->actionAddFiles, SIGNAL(triggered()),
             this, SLOT(addFiles()));
     connect(ui->actionExit, SIGNAL(triggered()),
@@ -97,8 +96,7 @@ void MainW::setupActions()
             qApp, SLOT(aboutQt()));
     connect(ui->musicTable, SIGNAL(cellPressed(int,int)),
             this, SLOT(tableClicked(int,int)));
-
-     ui->volumeSlider->setAudioOutput(audioOutput);
+     return;
  }
 
 void MainW::startButtonPressed()
@@ -106,50 +104,62 @@ void MainW::startButtonPressed()
     QString artist = ui->musicTable->itemAt(currentTrack,0)->text();
     QString track = ui->musicTable->itemAt(currentTrack,1)->text();
     emit startRecording(user, artist, track);
-    singleShotTimer->start(5000);
+    delayTrackPlayTimer->start(5000);
 }
 
 void MainW::startTrack()
 {
     emit logEmoState();
     emit startPlaying(sources[currentTrack]);
-    recurringTimer->start(1000);
-    return;
+    headsetTimer->start(1000);
 }
 
 void MainW::trackFinished()
 {
-    recurringTimer->stop();
+    headsetTimer->stop();
     emit stopRecording();
     if (currentTrack < sources.size()) {
         currentTrack++;
         emit startButtonPressed();
     }
+}
 
+void MainW::stopButtonPressed()
+{
+    headsetTimer->stop();
+    emit cancelRecording();
+    emit stopPlaying();
 }
 
 void MainW::updateTable(QList<QStringList> metaData)
-{
-    QTableWidgetItem *titleItem = new QTableWidgetItem(title);
-    titleItem->setFlags(titleItem->flags() ^ Qt::ItemIsEditable);
-    QTableWidgetItem *artistItem = new QTableWidgetItem(metaData.value("ARTIST"));
-    artistItem->setFlags(artistItem->flags() ^ Qt::ItemIsEditable);
-    QTableWidgetItem *albumItem = new QTableWidgetItem(metaData.value("ALBUM"));
-    albumItem->setFlags(albumItem->flags() ^ Qt::ItemIsEditable);
-    QTableWidgetItem *yearItem = new QTableWidgetItem(metaData.value("DATE"));
-    yearItem->setFlags(yearItem->flags() ^ Qt::ItemIsEditable);
+{   
+    if (metaData[0].isEmpty()) {
+        cout << "Error: metaData is empty";
+    }
 
-    track = title;
-    artist = artistItem->text();
+    QTableWidgetItem *artistItem = new QTableWidgetItem(metaData[0].takeFirst());
+    artistItem->setFlags(artistItem->flags() ^ Qt::ItemIsEditable);
+    QTableWidgetItem *titleItem = new QTableWidgetItem(metaData[1].takeFirst());
+    titleItem->setFlags(titleItem->flags() ^ Qt::ItemIsEditable);
+    QTableWidgetItem *albumItem = new QTableWidgetItem(metaData[2].takeFirst());
+    albumItem->setFlags(albumItem->flags() ^ Qt::ItemIsEditable);
+    QTableWidgetItem *yearItem = new QTableWidgetItem(metaData[3].takeFirst());
+    yearItem->setFlags(yearItem->flags() ^ Qt::ItemIsEditable);
 
     int currentRow = ui->musicTable->rowCount();
     ui->musicTable->insertRow(currentRow);
-    ui->musicTable->setItem(currentRow, 0, titleItem);
-    ui->musicTable->setItem(currentRow, 1, artistItem);
+    ui->musicTable->setItem(currentRow, 0, artistItem);
+    ui->musicTable->setItem(currentRow, 1, titleItem);
     ui->musicTable->setItem(currentRow, 2, albumItem);
     ui->musicTable->setItem(currentRow, 3, yearItem);
 
     ui->musicTable->resizeColumnsToContents();
     if (ui->musicTable->columnWidth(0) > 300)
         ui->musicTable->setColumnWidth(0, 300);
+    return;
+}
+
+void MainW::setVolumeSlider(Phonon::AudioOutput* audio)
+{
+    ui->volumeSlider->setAudioOutput(audio);
 }

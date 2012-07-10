@@ -36,6 +36,7 @@ private slots:
 public slots:
     void tick(qint64 time);
     void trackFinished();
+    void setVolumeSlider(Phonon::AudioOutput*);
 
 signals:
     // handles headset/database
@@ -53,15 +54,18 @@ private:
     Ui::MainW *ui;
 
     //  used to logEmoState every second for headset
-    QTimer* recurringTimer;
-    QTimer* singleShotTimer;
+    QTimer* headsetTimer;
 
-    // track being played
-    int currentTrack;
+    // used to provide 5 secon delay before starting to play track
+    QTimer* delayTrackPlayTimer;
 
     // used for mediaplayer
-    Phonon::SeekSlider *seekSlider;
+    Phonon::VolumeSlider *volumerSlider;
+
+    int currentTrack;
     QList<Phonon::MediaSource> sources;
+
+    QString user;
 
     void setupActions();
 
