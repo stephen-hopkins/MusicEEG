@@ -29,8 +29,8 @@ int main(int argc, char *argv[])
     QObject::connect(&w, SIGNAL(cancelRecording()),
                      &headset, SLOT(discardData()));
 
-    QObject::connect(&headset, SIGNAL(newUserTrack(QString,QString,QString,QList<float>,QList<float>,QList<float>,QList<float>,QList<float>)),
-                     &database, SLOT(saveUserTrack(QString,QString,QString,QList<float>,QList<float>,QList<float>,QList<float>,QList<float>)));
+    QObject::connect(&headset, SIGNAL(newUserTrack(QString,QString,QString,QList< QList<float> >)),
+                     &database, SLOT(saveUserTrack(QString,QString,QString,QList< QList<float> >)));
 
     QObject::connect(&w, SIGNAL(newSourceList(QList<Phonon::MediaSource>)),
                      &musicPlayer, SLOT(getMetaData(QList<Phonon::MediaSource>)));

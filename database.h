@@ -15,12 +15,13 @@ public:
 
 public slots:
 
-    void saveUserTrack (QString, QString, QString,
-                      QList<float>, QList<float>, QList<float>, QList<float>, QList<float>);
+    void saveUserTrack (QString user, QString artist, QString track, QList< QList<float> > rawEmoData);
+    void saveNewUser(QString user);
 
 private:
     QSqlDatabase db;
     bool dbInitialised();
+    float calcAverage(QList<float> input);
 };
 
 #endif // DATABASE_H

@@ -64,7 +64,13 @@ void Headset::logEmoState()
 
 void Headset::writeData()
 {
-    emit newUserTrack(user, artist, track, engagement, excitementST, excitementLT, frustration, meditation);
+    QList< QList<float> > rawEmoData;
+    rawEmoData.append(engagement);
+    rawEmoData.append(excitementST);
+    rawEmoData.append(excitementLT);
+    rawEmoData.append(frustration);
+    rawEmoData.append(meditation);
+    emit newUserTrack(user, artist, track, rawEmoData);
     discardData();
     return;
 }
