@@ -10,10 +10,15 @@ Headset::Headset()
     if (EE_EngineConnect() != EDK_OK)
         cerr << "Emotiv Engine start up failed";
     trackPlaying = false;
+    event = EE_EmoEngineEventCreate();
+    emoState	= EE_EmoStateCreate();
+
 }
 
 Headset::~Headset()
 {
+    EE_EmoStateFree(emoState);
+    EE_EmoEngineEventFree(event);
     EE_EngineDisconnect();
 }
 
@@ -22,8 +27,6 @@ void Headset::initialise(QString u, QString a, QString t)
     user = u;
     artist = a;
     track = t;
-    event = EE_EmoEngineEventCreate();
-    emoState	= EE_EmoStateCreate();
     userID = 0;
     engagement.clear();
     excitementST.clear();
@@ -77,8 +80,6 @@ void Headset::discardData()
     excitementLT.clear();
     frustration.clear();
     meditation.clear();
-    EE_EmoStateFree(emoState);
-    EE_EmoEngineEventFree(event);
     return;
 }
 

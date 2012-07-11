@@ -137,26 +137,31 @@ void MainW::updateTable(QList<QStringList> metaData)
         cout << "Error: metaData is empty";
     }
 
-    QTableWidgetItem *artistItem = new QTableWidgetItem(metaData[0].takeFirst());
-    artistItem->setFlags(artistItem->flags() ^ Qt::ItemIsEditable);
-    QTableWidgetItem *titleItem = new QTableWidgetItem(metaData[1].takeFirst());
-    titleItem->setFlags(titleItem->flags() ^ Qt::ItemIsEditable);
-    QTableWidgetItem *albumItem = new QTableWidgetItem(metaData[2].takeFirst());
-    albumItem->setFlags(albumItem->flags() ^ Qt::ItemIsEditable);
-    QTableWidgetItem *yearItem = new QTableWidgetItem(metaData[3].takeFirst());
-    yearItem->setFlags(yearItem->flags() ^ Qt::ItemIsEditable);
+    while (!metaData[0].isEmpty()) {
 
-    int currentRow = ui->musicTable->rowCount();
-    ui->musicTable->insertRow(currentRow);
-    ui->musicTable->setItem(currentRow, 0, artistItem);
-    ui->musicTable->setItem(currentRow, 1, titleItem);
-    ui->musicTable->setItem(currentRow, 2, albumItem);
-    ui->musicTable->setItem(currentRow, 3, yearItem);
+        QTableWidgetItem *artistItem = new QTableWidgetItem(metaData[0].takeFirst());
+        artistItem->setFlags(artistItem->flags() ^ Qt::ItemIsEditable);
+        QTableWidgetItem *titleItem = new QTableWidgetItem(metaData[1].takeFirst());
+        titleItem->setFlags(titleItem->flags() ^ Qt::ItemIsEditable);
+        QTableWidgetItem *albumItem = new QTableWidgetItem(metaData[2].takeFirst());
+        albumItem->setFlags(albumItem->flags() ^ Qt::ItemIsEditable);
+        QTableWidgetItem *yearItem = new QTableWidgetItem(metaData[3].takeFirst());
+        yearItem->setFlags(yearItem->flags() ^ Qt::ItemIsEditable);
+
+        int currentRow = ui->musicTable->rowCount();
+        ui->musicTable->insertRow(currentRow);
+        ui->musicTable->setItem(currentRow, 0, artistItem);
+        ui->musicTable->setItem(currentRow, 1, titleItem);
+        ui->musicTable->setItem(currentRow, 2, albumItem);
+        ui->musicTable->setItem(currentRow, 3, yearItem);
+
+    }
 
     ui->musicTable->resizeColumnsToContents();
-    if (ui->musicTable->columnWidth(0) > 300)
+
+    if (ui->musicTable->columnWidth(0) > 300) {
         ui->musicTable->setColumnWidth(0, 300);
-    return;
+    }
 }
 
 void MainW::setVolumeSlider(Phonon::AudioOutput* audio)
