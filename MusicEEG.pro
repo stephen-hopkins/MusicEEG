@@ -19,7 +19,8 @@ SOURCES += main.cpp\
     headset.cpp \
     database.cpp \
     musicplayer.cpp \
-    qcustomplot.cpp
+    qcustomplot.cpp \
+    displayemotion.cpp
 
 HEADERS  += mainw.h \
     headset.h \
@@ -28,9 +29,11 @@ HEADERS  += mainw.h \
     edk.h \
     database.h \
     musicplayer.h \
-    qcustomplot.h
+    qcustomplot.h \
+    displayemotion.h
 
-FORMS    += mainw.ui
+FORMS    += mainw.ui \
+    displayemotion.ui
 
 win32: LIBS += -L$$PWD/../Emotiv/ -ledk
 win32: LIBS += -L$$PWD/../Emotiv/ -ledk_utils
