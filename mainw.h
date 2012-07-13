@@ -8,6 +8,7 @@
 #include <phonon/volumeslider.h>
 #include <phonon/MediaSource>
 #include <QList>
+#include "database.h"
 
 namespace Ui {
 class MainW;
@@ -18,7 +19,7 @@ class MainW : public QMainWindow
     Q_OBJECT
 
 public:
-    explicit MainW(QWidget *parent = 0);
+    explicit MainW(Database* db, QWidget *parent = 0);
     ~MainW();
     
 private slots:
@@ -26,6 +27,7 @@ private slots:
     void startButtonPressed();
     void stopButtonPressed();
     void startTrack();
+    void userSelectionMade(QString userSelection);
 
     // music player
     void addFiles();
@@ -60,14 +62,16 @@ private:
     QTimer* delayTrackPlayTimer;
 
     // used for mediaplayer
-    Phonon::VolumeSlider *volumerSlider;
+    Phonon::VolumeSlider *volumeSlider;
 
     int currentTrack;
     QList<Phonon::MediaSource> sources;
 
     QString user;
+    Database* db;
 
     void setupActions();
+    void setupUsers();
 
 };
 

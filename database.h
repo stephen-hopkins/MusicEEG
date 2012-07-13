@@ -12,6 +12,7 @@ class Database : public QObject
 public:
     Database();
     ~Database();
+    QStringList getUsers();
 
 public slots:
 

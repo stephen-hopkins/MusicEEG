@@ -15,7 +15,7 @@ int main(int argc, char *argv[])
     Database database;
     Headset headset;
     MusicPlayer musicPlayer;
-    MainW w;
+    MainW w(&database);
 
     w.setVolumeSlider(musicPlayer.getAudioOutputPtr());
 

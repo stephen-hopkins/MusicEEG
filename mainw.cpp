@@ -1,25 +1,30 @@
 #include "mainw.h"
 #include "ui_mainw.h"
 #include <iostream>
+#include <QInputDialog>
 
 using namespace std;
 
-MainW::MainW(QWidget *parent) :
+MainW::MainW(Database* d, QWidget *parent) :
     QMainWindow(parent),
     ui(new Ui::MainW)
 {
+    db = d;
+    user = "NO USER SELECTED";
     ui->setupUi(this);
-    user = "Steve";
 
     headsetTimer = new QTimer();
     delayTrackPlayTimer = new QTimer();
+
+    setupActions();
+    setupUsers();
+
     delayTrackPlayTimer->setSingleShot(true);
     connect(headsetTimer, SIGNAL(timeout()),
                      this, SIGNAL(logEmoState()));
     connect(delayTrackPlayTimer, SIGNAL(timeout()),
             this, SLOT(startTrack()));
 
-    setupActions();
     ui->timeLcd->display("00:00");
     currentTrack = 0;
 }
@@ -29,6 +34,14 @@ MainW::~MainW()
     delete ui;
     delete headsetTimer;
     delete delayTrackPlayTimer;
+}
+
+void MainW::setupUsers()
+{
+    QStringList users = db->getUsers();
+    users.append("Add New User");
+    ui->comboBoxUsers->insertItems(0, users);
+    user = ui->comboBoxUsers->currentText();
 }
 
 void MainW::addFiles()
@@ -167,4 +180,30 @@ void MainW::updateTable(QList<QStringList> metaData)
 void MainW::setVolumeSlider(Phonon::AudioOutput* audio)
 {
     ui->volumeSlider->setAudioOutput(audio);
+}
+
+void MainW::userSelectionMade(QString userSelection)
+{
+    if (userSelection == "Add New User") {
+        QStringList users = db->getUsers();
+        bool validUsernameChosen = false;
+
+        while (!validUsernameChosen) {
+            bool ok;
+            QString newUser = QInputDialog::getText(this, "New User", "Enter desired username:", QLineEdit::Normal, QDir::home().dirName(), &ok);
+            if (ok && !newUser.isEmpty() && !users.contains(newUser, Qt::CaseInsensitive)) {
+                user = newUser;
+                db->saveNewUser(newUser);
+                int itemsPre = ui->comboBoxUsers->count();
+                ui->comboBoxUsers->removeItem(itemsPre - 1);
+                ui->comboBoxUsers->addItem(newUser);
+                ui->comboBoxUsers->addItem("Add New User");
+                ui->comboBoxUsers->setCurrentIndex(itemsPre - 1);
+                validUsernameChosen = true;
+            }
+        }
+    }
+    else {
+        user = userSelection;
+    }
 }

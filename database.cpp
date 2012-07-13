@@ -3,7 +3,7 @@
 #include <QSqlRecord>
 #include <iostream>
 #include <QVariant>
-#include <QString>
+#include <QStringList>
 
 using namespace std;
 
@@ -57,6 +57,7 @@ void Database::saveNewUser(QString user)
             cerr << "Error adding new User to Database";
         }
     }
+    return;
 }
 
 void Database::saveUserTrack(QString user, QString artist, QString track, QList< QList<float> > rawEmoData)
@@ -132,3 +133,13 @@ float Database::calcAverage(QList<float> input)
    return total / items;
 }
 
+QStringList Database::getUsers()
+{
+    QStringList users;
+    QSqlQuery usersQuery("SELECT User FROM Users");
+    while (usersQuery.next()) {
+        QString user = usersQuery.value(0).toString();
+        users.append(user);
+    }
+    return users;
+}

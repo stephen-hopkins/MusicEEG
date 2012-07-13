@@ -60,7 +60,7 @@
     <item>
      <layout class="QHBoxLayout" name="horizontalLayout">
       <item>
-       <widget class="Phonon::VolumeSlider" name="volumeSlider">
+       <widget class="Phonon::VolumeSlider" name="volumeSlider" native="true">
         <property name="sizePolicy">
          <sizepolicy hsizetype="Expanding" vsizetype="Preferred">
           <horstretch>0</horstretch>
@@ -71,6 +71,9 @@
       </item>
       <item>
        <widget class="QLCDNumber" name="timeLcd"/>
+      </item>
+      <item>
+       <widget class="QComboBox" name="comboBoxUsers"/>
       </item>
      </layout>
     </item>
@@ -182,5 +185,25 @@
   </customwidget>
  </customwidgets>
  <resources/>
- <connections/>
+ <connections>
+  <connection>
+   <sender>comboBoxUsers</sender>
+   <signal>currentIndexChanged(QString)</signal>
+   <receiver>MainW</receiver>
+   <slot>userSelectionMade(QString)</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>815</x>
+     <y>618</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>827</x>
+     <y>546</y>
+    </hint>
+   </hints>
+  </connection>
+ </connections>
+ <slots>
+  <slot>userSelectionMade(QString)</slot>
+ </slots>
 </ui>
