@@ -120,6 +120,8 @@ void Database::saveUserTrack(QString user, QString artist, QString track, QList<
             cerr << "Error adding record to UTid table" << endl;
         }
     }
+    //showOutputOnScreen(user, artist, track, rawEmoData, averages, changes);
+
     return;
 }
 
@@ -142,4 +144,9 @@ QStringList Database::getUsers()
         users.append(user);
     }
     return users;
+}
+
+void showOutputOnScreen(QString user, QString artist, QString track, QList< QList<float> > rawEmoData, QList<float> averages, QList<float> changes)
+{
+
 }

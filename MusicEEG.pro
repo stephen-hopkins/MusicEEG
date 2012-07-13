@@ -18,7 +18,8 @@ SOURCES += main.cpp\
         mainw.cpp \
     headset.cpp \
     database.cpp \
-    musicplayer.cpp
+    musicplayer.cpp \
+    qcustomplot.cpp
 
 HEADERS  += mainw.h \
     headset.h \
@@ -26,7 +27,8 @@ HEADERS  += mainw.h \
     edkErrorCode.h \
     edk.h \
     database.h \
-    musicplayer.h
+    musicplayer.h \
+    qcustomplot.h
 
 FORMS    += mainw.ui
 
