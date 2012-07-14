@@ -35,8 +35,8 @@ HEADERS  += mainw.h \
 FORMS    += mainw.ui \
     displayemotion.ui
 
-win32: LIBS += -L$$PWD/../Emotiv/ -ledk
-win32: LIBS += -L$$PWD/../Emotiv/ -ledk_utils
+win32: LIBS += -L$$PWD -ledk
+win32: LIBS += -L$$PWD -ledk_utils
 
 INCLUDEPATH += $$PWD/../Emotiv
 DEPENDPATH += $$PWD/../Emotiv

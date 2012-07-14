@@ -9,6 +9,8 @@
 #include <phonon/MediaSource>
 #include <QList>
 #include "database.h"
+#include "musicplayer.h"
+#include "displayemotion.h"
 
 namespace Ui {
 class MainW;
@@ -19,7 +21,7 @@ class MainW : public QMainWindow
     Q_OBJECT
 
 public:
-    explicit MainW(Database* db, QWidget *parent = 0);
+    explicit MainW(QWidget *parent = 0);
     ~MainW();
     
 private slots:
@@ -55,23 +57,22 @@ signals:
 private:
     Ui::MainW *ui;
 
-    //  used to logEmoState every second for headset
     QTimer* headsetTimer;
-
-    // used to provide 5 secon delay before starting to play track
     QTimer* delayTrackPlayTimer;
-
-    // used for mediaplayer
     Phonon::VolumeSlider *volumeSlider;
 
     int currentTrack;
     QList<Phonon::MediaSource> sources;
-
     QString user;
+
     Database* db;
+    Headset* headset;
+    MusicPlayer* musicPlayer;
+    DisplayEmotion* displayEmotion;
 
     void setupActions();
     void setupUsers();
+    void connectSignalsSlots();
 
 };
 

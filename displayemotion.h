@@ -4,22 +4,25 @@
 #include <QDialog>
 
 namespace Ui {
-class displayEmotion;
+class DisplayEmotion;
 }
 
-class displayEmotion : public QDialog
+class DisplayEmotion : public QDialog
 {
     Q_OBJECT
     
 public:
-    explicit displayEmotion(QWidget *parent = 0);
-    ~displayEmotion();
+    explicit DisplayEmotion(QWidget *parent = 0);
+    ~DisplayEmotion();
     void setRawData(QList< QList<float> > rawEmoData);
     void setAverages(QList<float>);
     void setChanges(QList<float>);
+
+public slots:
+    void updateWindow(QString user, QString artist, QString track, QList< QList<float> > rawData, QList<float> averages, QList<float> changes);
     
 private:
-    Ui::displayEmotion *ui;
+    Ui::DisplayEmotion *ui;
 };
 
 #endif // DISPLAYEMOTION_H

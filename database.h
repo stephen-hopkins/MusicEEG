@@ -16,14 +16,12 @@ public:
 
 public slots:
 
-    void saveUserTrack (QString user, QString artist, QString track, QList< QList<float> > rawEmoData);
+    void saveUserTrack (QString user, QString artist, QString track, QList< QList<float> > rawEmoData, QList<float> averages, QList<float> changes);
     void saveNewUser(QString user);
 
 private:
     QSqlDatabase db;
     bool dbInitialised();
-    float calcAverage(QList<float> input);
-    void showOutputOnScreen(QString user, QString artist, QString track, QList< QList<float> > rawEmoData, QList<float> averages, QList<float> changes);
 
 };
 

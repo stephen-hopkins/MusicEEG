@@ -5,35 +5,78 @@
 
 using namespace std;
 
-MainW::MainW(Database* d, QWidget *parent) :
+MainW::MainW(QWidget *parent) :
     QMainWindow(parent),
     ui(new Ui::MainW)
 {
-    db = d;
-    user = "NO USER SELECTED";
     ui->setupUi(this);
+
+    db = new Database();
+    headset = new Headset();
+    musicPlayer = new MusicPlayer();
+    displayEmotion = new DisplayEmotion();
+
+    user = "NO USER SELECTED";
+    currentTrack = 0;
 
     headsetTimer = new QTimer();
     delayTrackPlayTimer = new QTimer();
+    delayTrackPlayTimer->setSingleShot(true);
 
     setupActions();
     setupUsers();
+    connectSignalsSlots();
 
-    delayTrackPlayTimer->setSingleShot(true);
+    ui->timeLcd->display("00:00");
+    setVolumeSlider(musicPlayer->getAudioOutputPtr());
+}
+
+void MainW::connectSignalsSlots()
+{
     connect(headsetTimer, SIGNAL(timeout()),
-                     this, SIGNAL(logEmoState()));
+            this, SIGNAL(logEmoState()));
     connect(delayTrackPlayTimer, SIGNAL(timeout()),
             this, SLOT(startTrack()));
 
-    ui->timeLcd->display("00:00");
-    currentTrack = 0;
+    connect(this, SIGNAL(startRecording(QString,QString,QString)),
+            headset, SLOT(initialise(QString,QString,QString)));
+    connect(this, SIGNAL(logEmoState()),
+            headset, SLOT(logEmoState()));
+    connect(this, SIGNAL(stopRecording()),
+            headset, SLOT(writeData()));
+    connect(this, SIGNAL(cancelRecording()),
+            headset, SLOT(discardData()));
+
+    connect(headset, SIGNAL(newUserTrack(QString,QString,QString,QList< QList<float> >, QList<float>, QList<float>)),
+            db, SLOT(saveUserTrack(QString,QString,QString,QList< QList<float> >, QList<float>, QList<float>)));
+    connect(headset, SIGNAL(newUserTrack(QString,QString,QString,QList<QList<float> >,QList<float>,QList<float>)),
+            displayEmotion, SLOT(updateWindow(QString,QString,QString,QList<QList<float> >,QList<float>,QList<float>)));
+
+    connect(this, SIGNAL(newSourceList(QList<Phonon::MediaSource>)),
+            musicPlayer, SLOT(getMetaData(QList<Phonon::MediaSource>)));
+    connect(musicPlayer, SIGNAL(newMetaData(QList<QStringList>)),
+            this, SLOT(updateTable(QList<QStringList>)));
+    connect(this, SIGNAL(startPlaying(Phonon::MediaSource)),
+            musicPlayer, SLOT(startPlaying(Phonon::MediaSource)));
+    connect(this, SIGNAL(stopPlaying()),
+            musicPlayer, SLOT(stopPlaying()));
+    connect(musicPlayer, SIGNAL(trackFinished()),
+            this, SLOT(trackFinished()));
+    connect(musicPlayer, SIGNAL(tick(qint64)),
+            this, SLOT(tick(qint64)));
+
 }
+
 
 MainW::~MainW()
 {
     delete ui;
     delete headsetTimer;
     delete delayTrackPlayTimer;
+    delete db;
+    delete headset;
+    delete musicPlayer;
+    delete displayEmotion;
 }
 
 void MainW::setupUsers()

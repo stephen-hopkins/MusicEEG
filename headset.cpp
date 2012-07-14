@@ -29,8 +29,7 @@ void Headset::initialise(QString u, QString a, QString t)
     track = t;
     userID = 0;
     engagement.clear();
-    excitementST.clear();
-    excitementLT.clear();
+    excitement.clear();
     frustration.clear();
     meditation.clear();
 }
@@ -50,8 +49,7 @@ void Headset::logEmoState()
             const float timestamp = ES_GetTimeFromStart(emoState);
             cout << "New EmoState from user" << timestamp << " " << userID << endl;
             engagement << ES_AffectivGetEngagementBoredomScore(emoState);
-            excitementST << ES_AffectivGetExcitementShortTermScore(emoState);
-            excitementLT << ES_AffectivGetExcitementLongTermScore(emoState);
+            excitement << ES_AffectivGetExcitementShortTermScore(emoState);
             frustration << ES_AffectivGetFrustrationScore(emoState);
             meditation << ES_AffectivGetMeditationScore(emoState);
         }
@@ -66,11 +64,25 @@ void Headset::writeData()
 {
     QList< QList<float> > rawEmoData;
     rawEmoData.append(engagement);
-    rawEmoData.append(excitementST);
-    rawEmoData.append(excitementLT);
+    rawEmoData.append(excitement);
     rawEmoData.append(frustration);
     rawEmoData.append(meditation);
-    emit newUserTrack(user, artist, track, rawEmoData);
+
+    // calculate averages & change in averages
+    QList<float> averages;
+    QList<float> changes;
+
+    for (int n = 0 ; n < 4 ; n++) {
+        averages[n] = calcAverage(rawEmoData[n]);
+    }
+
+    for (int n = 0 ; n < 4 ; n++) {
+        float avebeginning = calcAverage(rawEmoData[n].mid(0, 30));
+        float aveend = calcAverage(rawEmoData[n].mid((rawEmoData[n].length())-30, 30 ));
+        changes[n] = aveend - avebeginning;
+    }
+
+    emit newUserTrack(user, artist, track, rawEmoData, averages, changes);
     discardData();
     return;
 }
@@ -82,12 +94,19 @@ void Headset::discardData()
     track = "NOT SET";
     userID = 0;
     engagement.clear();
-    excitementST.clear();
-    excitementLT.clear();
+    excitement.clear();
     frustration.clear();
     meditation.clear();
     return;
 }
 
-
+float Headset::calcAverage(QList<float> input)
+{
+   float total = 0;
+   int items = input.size();
+   while (!input.isEmpty()) {
+       total += input.takeFirst();
+   }
+   return total / items;
+}
 
