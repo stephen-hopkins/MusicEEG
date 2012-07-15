@@ -174,7 +174,7 @@ void MainW::trackFinished()
 {
     headsetTimer->stop();
     emit stopRecording();
-    if (currentTrack < sources.size()) {
+    if ((currentTrack + 1) < sources.size()) {
         currentTrack++;
         emit startButtonPressed();
     }

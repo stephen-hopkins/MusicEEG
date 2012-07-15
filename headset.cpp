@@ -7,8 +7,11 @@ using namespace std;
 
 Headset::Headset()
 {
-    if (EE_EngineConnect() != EDK_OK)
+    if (EE_EngineRemoteConnect("127.0.0.1", 3008) != EDK_OK) {
         cerr << "Emotiv Engine start up failed";
+        cerr << "Error code: " << EE_EngineRemoteConnect("127.0.0.1", 3008) << endl;
+    }
+
     trackPlaying = false;
     event = EE_EmoEngineEventCreate();
     emoState	= EE_EmoStateCreate();
@@ -73,13 +76,13 @@ void Headset::writeData()
     QList<float> changes;
 
     for (int n = 0 ; n < 4 ; n++) {
-        averages[n] = calcAverage(rawEmoData[n]);
+        averages.append(calcAverage(rawEmoData[n]));
     }
 
     for (int n = 0 ; n < 4 ; n++) {
         float avebeginning = calcAverage(rawEmoData[n].mid(0, 30));
         float aveend = calcAverage(rawEmoData[n].mid((rawEmoData[n].length())-30, 30 ));
-        changes[n] = aveend - avebeginning;
+        changes.append(aveend - avebeginning);
     }
 
     emit newUserTrack(user, artist, track, rawEmoData, averages, changes);

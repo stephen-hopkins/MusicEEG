@@ -72,7 +72,7 @@ void Database::saveUserTrack(QString user, QString artist, QString track, QList<
 
     // Add entry into main table UserTracks
     QSqlQuery addData(db);
-    addData.prepare(QString("INSERT INTO UserTracks VALUES(NULL, :user, :artist, :track, :length, :ave0, :ave1, :ave2, :ave3, :cha0, :cha1, :cha2, :cha3"));
+    addData.prepare(QString("INSERT INTO UserTracks VALUES(NULL, :user, :artist, :track, :length, :ave0, :ave1, :ave2, :ave3, :cha0, :cha1, :cha2, :cha3)"));
     addData.bindValue(":user", user);
     addData.bindValue(":artist", artist);
     addData.bindValue(":track", track);
@@ -86,7 +86,7 @@ void Database::saveUserTrack(QString user, QString artist, QString track, QList<
     }
 
     if (!addData.exec()) {
-        cerr << "Error adding new UserTrack to database";
+        cerr << "Error adding new UserTrack to database" << endl;
     }
 
     QString utID = addData.lastInsertId().toString();
@@ -97,7 +97,7 @@ void Database::saveUserTrack(QString user, QString artist, QString track, QList<
         cerr << "Error adding new table to hold raw emotion data";
     }
 
-    addData.prepare(QString("INSERT INTO UTid%1 VALUES(NULL, :engagement, :excitementST, :excitementLT, :frustration, :meditation)").arg(utID));
+    addData.prepare(QString("INSERT INTO UTid%1 VALUES(NULL, :engagement, :excitement, :frustration, :meditation)").arg(utID));
     while (!rawEmoData[0].isEmpty()) {
         addData.bindValue(":engagement", rawEmoData[0].takeFirst());
         addData.bindValue(":excitement", rawEmoData[1].takeFirst());
