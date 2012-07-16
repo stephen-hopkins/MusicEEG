@@ -89,7 +89,6 @@ void MainW::setupUsers()
 
 void MainW::addFiles()
  {
-    sources.clear();
     QStringList files = QFileDialog::getOpenFileNames(this, tr("Select Music Files"),
                                                       QDesktopServices::storageLocation(QDesktopServices::MusicLocation));
 

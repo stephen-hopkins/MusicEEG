@@ -59,6 +59,16 @@ void MusicPlayer::getMetaData(QList<Phonon::MediaSource> inputSources)
     }
 
     sources = inputSources;
+
+    TagLib::FileRef f(sources[0].fileName().toStdString().c_str());
+    TagLib::Tag* tag = f.tag();
+    QString title = tag->title().toCString();
+    QString artist = tag->artist().toCString();
+    QString album = tag->album().toCString();
+    QString year = tag->year();
+
+
+
     addNextFile();
 }
 
@@ -100,3 +110,5 @@ Phonon::AudioOutput* MusicPlayer::getAudioOutputPtr()
 {
     return audioOutput;
 }
+
+

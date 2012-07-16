@@ -1,6 +1,8 @@
 #ifndef MUSICPLAYER_H
 #define MUSICPLAYER_H
 
+#define TAGLIB_STATIC
+
 #include <phonon/audiooutput.h>
 #include <phonon/mediaobject.h>
 #include <phonon/backendcapabilities.h>
@@ -8,13 +10,16 @@
 #include <QObject>
 #include <QMessageBox>
 
+#include "taglib/tag.h"
+#include "taglib/fileref.h"
+
 class MusicPlayer : public QObject
 {
     Q_OBJECT
 public:
     MusicPlayer();
     ~MusicPlayer();
-    Phonon::AudioOutput* getAudioOutputPtr();
+    Phonon::AudioOutput* getAudioOutputPtr();   
 
 public slots:
     void startPlaying(Phonon::MediaSource);

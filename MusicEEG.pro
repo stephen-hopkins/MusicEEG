@@ -41,7 +41,19 @@ win32: LIBS += -L$$PWD -ledk_utils
 INCLUDEPATH += $$PWD/../Emotiv
 DEPENDPATH += $$PWD/../Emotiv
 
+win32:CONFIG(release, debug|release): LIBS += -L$$PWD/../../taglib/taglib/taglib/Release/x86/ -ltag
+else:win32:CONFIG(debug, debug|release): LIBS += -L$$PWD/../../taglib/taglib/taglib/Debug/x86/ -ltagd
 
+INCLUDEPATH += $$PWD/../../taglib/taglib/include
+DEPENDPATH += $$PWD/../../taglib/taglib/include
 
+win32:CONFIG(release, debug|release): PRE_TARGETDEPS += $$PWD/../../taglib/taglib/taglib/Release/x86/tag.lib
+else:win32:CONFIG(debug, debug|release): PRE_TARGETDEPS += $$PWD/../../taglib/taglib/taglib/Debug/x86/tagd.lib
+
+INCLUDEPATH += $$PWD/../../taglib/taglib/
+DEPENDPATH += $$PWD/../../taglib/taglib/
+
+win32:CONFIG(release, debug|release): LIBS += -L$$PWD/../../taglib/taglib/taglib/Debug/x86/ -ltag
+else:win32:CONFIG(debug, debug|release): LIBS += -L$$PWD/../../taglib/taglib/taglib/Debug/x86/ -ltagd
 
 
