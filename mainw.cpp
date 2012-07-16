@@ -89,20 +89,21 @@ void MainW::setupUsers()
 
 void MainW::addFiles()
  {
-     QStringList files = QFileDialog::getOpenFileNames(this, tr("Select Music Files"),
-         QDesktopServices::storageLocation(QDesktopServices::MusicLocation));
+    sources.clear();
+    QStringList files = QFileDialog::getOpenFileNames(this, tr("Select Music Files"),
+                                                      QDesktopServices::storageLocation(QDesktopServices::MusicLocation));
 
-     if (files.isEmpty())
-         return;
+    if (files.isEmpty())
+        return;
 
-     foreach (QString string, files) {
-             Phonon::MediaSource source(string);
+    foreach (QString string, files) {
+        Phonon::MediaSource source(string);
 
-         sources.append(source);
-     }
-     if (!sources.isEmpty())
-         emit newSourceList(sources);
-     currentTrack = 0;
+        sources.append(source);
+    }
+    if (!sources.isEmpty())
+        emit newSourceList(sources);
+    currentTrack = 0;
  }
 
 void MainW::about()
@@ -157,8 +158,9 @@ void MainW::setupActions()
 
 void MainW::startButtonPressed()
 {
-    QString artist = ui->musicTable->itemAt(currentTrack,0)->text();
-    QString track = ui->musicTable->itemAt(currentTrack,1)->text();
+    QString artist = ui->musicTable->item(currentTrack,0)->text();
+    QString track = ui->musicTable->item(currentTrack,1)->text();
+
     emit startRecording(user, artist, track);
     delayTrackPlayTimer->start(5000);
 }
