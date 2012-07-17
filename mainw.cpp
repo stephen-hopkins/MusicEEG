@@ -20,15 +20,12 @@ MainW::MainW(QWidget *parent) :
     currentTrack = 0;
 
     headsetTimer = new QTimer();
-    delayTrackPlayTimer = new QTimer();
-    delayTrackPlayTimer->setSingleShot(true);
 
     setupActions();
     setupUsers();
     connectSignalsSlots();
 
     ui->timeLcd->display("00:00");
-    //volumeSlider->setAudioOutput(musicPlayer->getAudioOutputPtr());
     setVolumeSlider(musicPlayer->getAudioOutputPtr());
 }
 
@@ -36,8 +33,6 @@ void MainW::connectSignalsSlots()
 {
     connect(headsetTimer, SIGNAL(timeout()),
             this, SIGNAL(logEmoState()));
-    connect(delayTrackPlayTimer, SIGNAL(timeout()),
-            this, SLOT(startTrack()));
 
     connect(this, SIGNAL(startRecording(QString,QString,QString)),
             headset, SLOT(initialise(QString,QString,QString)));
@@ -62,6 +57,9 @@ void MainW::connectSignalsSlots()
     connect(musicPlayer, SIGNAL(tick(qint64)),
             this, SLOT(tick(qint64)));
 
+    connect(displayEmotion, SIGNAL(pressedOK()),
+            this, SLOT(continuePlaying()));
+
 }
 
 
@@ -69,7 +67,6 @@ MainW::~MainW()
 {
     delete ui;
     delete headsetTimer;
-    delete delayTrackPlayTimer;
     delete db;
     delete headset;
     delete musicPlayer;
@@ -124,10 +121,8 @@ void MainW::tableClicked(int row, int /* column */)
      if (row >= sources.size())
          return;
 
-     ui->musicTable->selectRow(row);
-     ui->timeLcd->display("00:00");
      currentTrack = row;
-     emit startButtonPressed();
+     startButtonPressed();
  }
 
 void MainW::setupActions()
@@ -158,12 +153,10 @@ void MainW::startButtonPressed()
     QString artist = ui->musicTable->item(currentTrack,0)->text();
     QString track = ui->musicTable->item(currentTrack,1)->text();
 
-    emit startRecording(user, artist, track);
-    delayTrackPlayTimer->start(5000);
-}
+    ui->musicTable->selectRow(currentTrack);
+    ui->timeLcd->display("00:00");
 
-void MainW::startTrack()
-{
+    emit startRecording(user, artist, track);
     emit logEmoState();
     emit startPlaying(sources[currentTrack]);
     headsetTimer->start(1000);
@@ -173,9 +166,13 @@ void MainW::trackFinished()
 {
     headsetTimer->stop();
     emit stopRecording();
-    if ((currentTrack + 1) < sources.size()) {
+}
+
+void MainW::continuePlaying()
+{
+    if (currentTrack + 1 < sources.size()) {
         currentTrack++;
-        emit startButtonPressed();
+        startButtonPressed();
     }
 }
 
@@ -188,6 +185,10 @@ void MainW::stopButtonPressed()
 
 void MainW::updateTable(QList<QStringList> metaData)
 {   
+    while (ui->musicTable->rowCount() != 0) {
+        ui->musicTable->removeRow(0);
+    }
+
     while (!metaData.isEmpty()) {
 
         QStringList thisMetadata = metaData.takeFirst();

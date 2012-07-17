@@ -28,7 +28,6 @@ private slots:
 
     void startButtonPressed();
     void stopButtonPressed();
-    void startTrack();
     void userSelectionMade(QString userSelection);
 
     // music player
@@ -40,6 +39,7 @@ public slots:
     void tick(qint64 time);
     void trackFinished();
     void setVolumeSlider(Phonon::AudioOutput*);
+    void continuePlaying();
 
 signals:
     // handles headset/database
@@ -56,7 +56,6 @@ private:
     Ui::MainW *ui;
 
     QTimer* headsetTimer;
-    QTimer* delayTrackPlayTimer;
     Phonon::VolumeSlider* volumeSlider;
 
     int currentTrack;

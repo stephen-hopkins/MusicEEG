@@ -1,12 +1,16 @@
 #include "displayemotion.h"
 #include "ui_displayemotion.h"
 
+#include <iostream>
+
 
 DisplayEmotion::DisplayEmotion(QWidget *parent) :
     QDialog(parent),
     ui(new Ui::DisplayEmotion)
 {
     ui->setupUi(this);
+    connect(ui->okButton, SIGNAL(clicked()),
+            this, SIGNAL(pressedOK()));
 
     ui->chart->legend->setVisible(true);
     QFont legendFont = font();
@@ -67,7 +71,7 @@ void DisplayEmotion::updateWindow(QString user, QString artist, QString track, Q
     ui->chart->graph(3)->setData(x, meditation);
     ui->chart->rescaleAxes();
 
-    QString title = QString("User: %1 Track: %2 by %3" ).arg(user, artist, track);
+    QString title = QString("User: %1 Track: %2 by %3" ).arg(user, track, artist);
     ui->chart->setTitle(title);
     ui->chart->replot();
 
@@ -78,13 +82,17 @@ void DisplayEmotion::updateWindow(QString user, QString artist, QString track, Q
         ui->summaryTable->setItem(n, 0, ave);
         ui->summaryTable->setItem(n, 1, cha);
     }
+    QString filename = QString("%1%2%3.jpg").arg(user, artist, track);
+    filename.remove(" ");
+    ui->chart->saveJpg(filename);
+
     this->show();
 }
 
 
 
-
-
-
-
-
+void DisplayEmotion::on_okButton_clicked()
+{
+    this->hide();
+    emit pressedOK();
+}

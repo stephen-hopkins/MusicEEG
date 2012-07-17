@@ -20,7 +20,13 @@ public:
 
 public slots:
     void updateWindow(QString user, QString artist, QString track, QList< QList<float> > rawData, QList<float> averages, QList<float> changes);
-    
+
+signals:
+    void pressedOK();
+
+private slots:
+    void on_okButton_clicked();
+
 private:
     Ui::DisplayEmotion *ui;
 };

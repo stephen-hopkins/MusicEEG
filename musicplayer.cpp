@@ -27,10 +27,9 @@ MusicPlayer::~MusicPlayer()
 
 void MusicPlayer::startPlaying(Phonon::MediaSource track)
 {
-    mediaObject->enqueue(track);
+    mediaObject->setCurrentSource(track);
     mediaObject->play();
 }
-
 
 void MusicPlayer::stopPlaying()
 {
