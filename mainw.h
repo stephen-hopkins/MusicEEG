@@ -35,7 +35,6 @@ private slots:
     void addFiles();
     void about();
     void tableClicked(int row, int column);
-    void updateTable(QList<QStringList>);
 
 public slots:
     void tick(qint64 time);
@@ -52,14 +51,13 @@ signals:
     // goes to mediaplayer
     void startPlaying(Phonon::MediaSource);
     void stopPlaying();
-    void newSourceList(QList<Phonon::MediaSource>);
 
 private:
     Ui::MainW *ui;
 
     QTimer* headsetTimer;
     QTimer* delayTrackPlayTimer;
-    Phonon::VolumeSlider *volumeSlider;
+    Phonon::VolumeSlider* volumeSlider;
 
     int currentTrack;
     QList<Phonon::MediaSource> sources;
@@ -73,6 +71,7 @@ private:
     void setupActions();
     void setupUsers();
     void connectSignalsSlots();
+    void updateTable(QList<QStringList>);
 
 };
 

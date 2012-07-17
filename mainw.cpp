@@ -28,6 +28,7 @@ MainW::MainW(QWidget *parent) :
     connectSignalsSlots();
 
     ui->timeLcd->display("00:00");
+    //volumeSlider->setAudioOutput(musicPlayer->getAudioOutputPtr());
     setVolumeSlider(musicPlayer->getAudioOutputPtr());
 }
 
@@ -52,10 +53,6 @@ void MainW::connectSignalsSlots()
     connect(headset, SIGNAL(newUserTrack(QString,QString,QString,QList<QList<float> >,QList<float>,QList<float>)),
             displayEmotion, SLOT(updateWindow(QString,QString,QString,QList<QList<float> >,QList<float>,QList<float>)));
 
-    connect(this, SIGNAL(newSourceList(QList<Phonon::MediaSource>)),
-            musicPlayer, SLOT(getMetaData(QList<Phonon::MediaSource>)));
-    connect(musicPlayer, SIGNAL(newMetaData(QList<QStringList>)),
-            this, SLOT(updateTable(QList<QStringList>)));
     connect(this, SIGNAL(startPlaying(Phonon::MediaSource)),
             musicPlayer, SLOT(startPlaying(Phonon::MediaSource)));
     connect(this, SIGNAL(stopPlaying()),
@@ -89,6 +86,7 @@ void MainW::setupUsers()
 
 void MainW::addFiles()
  {
+    sources.clear();
     QStringList files = QFileDialog::getOpenFileNames(this, tr("Select Music Files"),
                                                       QDesktopServices::storageLocation(QDesktopServices::MusicLocation));
 
@@ -100,9 +98,9 @@ void MainW::addFiles()
 
         sources.append(source);
     }
-    if (!sources.isEmpty())
-        emit newSourceList(sources);
     currentTrack = 0;
+    updateTable(musicPlayer->getMetaData(sources));
+
  }
 
 void MainW::about()
@@ -190,19 +188,17 @@ void MainW::stopButtonPressed()
 
 void MainW::updateTable(QList<QStringList> metaData)
 {   
-    if (metaData[0].isEmpty()) {
-        cout << "Error: metaData is empty";
-    }
+    while (!metaData.isEmpty()) {
 
-    while (!metaData[0].isEmpty()) {
+        QStringList thisMetadata = metaData.takeFirst();
 
-        QTableWidgetItem *artistItem = new QTableWidgetItem(metaData[0].takeFirst());
+        QTableWidgetItem *artistItem = new QTableWidgetItem(thisMetadata[0]);
         artistItem->setFlags(artistItem->flags() ^ Qt::ItemIsEditable);
-        QTableWidgetItem *titleItem = new QTableWidgetItem(metaData[1].takeFirst());
+        QTableWidgetItem *titleItem = new QTableWidgetItem(thisMetadata[1]);
         titleItem->setFlags(titleItem->flags() ^ Qt::ItemIsEditable);
-        QTableWidgetItem *albumItem = new QTableWidgetItem(metaData[2].takeFirst());
+        QTableWidgetItem *albumItem = new QTableWidgetItem(thisMetadata[2]);
         albumItem->setFlags(albumItem->flags() ^ Qt::ItemIsEditable);
-        QTableWidgetItem *yearItem = new QTableWidgetItem(metaData[3].takeFirst());
+        QTableWidgetItem *yearItem = new QTableWidgetItem(thisMetadata[3]);
         yearItem->setFlags(yearItem->flags() ^ Qt::ItemIsEditable);
 
         int currentRow = ui->musicTable->rowCount();
@@ -219,11 +215,6 @@ void MainW::updateTable(QList<QStringList> metaData)
     if (ui->musicTable->columnWidth(0) > 300) {
         ui->musicTable->setColumnWidth(0, 300);
     }
-}
-
-void MainW::setVolumeSlider(Phonon::AudioOutput* audio)
-{
-    ui->volumeSlider->setAudioOutput(audio);
 }
 
 void MainW::userSelectionMade(QString userSelection)
@@ -251,3 +242,9 @@ void MainW::userSelectionMade(QString userSelection)
         user = userSelection;
     }
 }
+
+void MainW::setVolumeSlider(Phonon::AudioOutput* audio)
+{
+    ui->volumeSlider->setAudioOutput(audio);
+}
+

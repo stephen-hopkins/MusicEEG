@@ -20,29 +20,21 @@ public:
     MusicPlayer();
     ~MusicPlayer();
     Phonon::AudioOutput* getAudioOutputPtr();   
+    QList<QStringList> getMetaData(QList<Phonon::MediaSource>);
+
 
 public slots:
     void startPlaying(Phonon::MediaSource);
     void stopPlaying();
-    void getMetaData(QList<Phonon::MediaSource>);
-
-private slots:
-    void handleNewMetadata();
 
 signals:
-    void newMetaData(QList<QStringList>);
     void trackFinished();
     void tick(qint64);
 
 private:
-    Phonon::MediaObject *mediaObject;
-    Phonon::MediaObject *metaInformationResolver;
-    Phonon::AudioOutput *audioOutput;
+    Phonon::MediaObject* mediaObject;
+    Phonon::AudioOutput* audioOutput;
 
-    QList<QStringList> processedMetaData;
-    QList<Phonon::MediaSource> sources;
-
-    void addNextFile();
 };
 
 #endif // MUSICPLAYER_H
