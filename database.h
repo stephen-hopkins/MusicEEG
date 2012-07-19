@@ -16,7 +16,7 @@ public:
 
 public slots:
 
-    void saveUserTrack (QString user, QString artist, QString track, QList< QList<float> > rawEmoData, QList<float> averages, QList<float> changes);
+    void saveUserTrack (QString user, QString artist, QString track, QList< QList<float> > rawEmoData, QList< QList<float> > stats);
     void saveNewUser(QString user);
 
 private:

@@ -38,7 +38,7 @@ DisplayEmotion::~DisplayEmotion()
     delete ui;
 }
 
-void DisplayEmotion::updateWindow(QString user, QString artist, QString track, QList< QList<float> > rawData, QList<float> averages, QList<float> changes)
+void DisplayEmotion::updateWindow(QString user, QString artist, QString track, QList< QList<float> > rawData, QList< QList<float> > stats)
 {
 
     // Update chart
@@ -77,10 +77,12 @@ void DisplayEmotion::updateWindow(QString user, QString artist, QString track, Q
 
     // Update table
     for (int n = 0 ; n < 4 ; n++) {
-        QTableWidgetItem* ave = new QTableWidgetItem(QString::number(averages[n]));
-        QTableWidgetItem* cha = new QTableWidgetItem(QString::number(changes[n]));
+        QTableWidgetItem* ave = new QTableWidgetItem(QString::number(stats[0][n]));
+        QTableWidgetItem* cha = new QTableWidgetItem(QString::number(stats[1][n]));
+        QTableWidgetItem* std = new QTableWidgetItem(QString::number(stats[2][n]));
         ui->summaryTable->setItem(n, 0, ave);
         ui->summaryTable->setItem(n, 1, cha);
+        ui->summaryTable->setItem(n, 2, std);
     }
     QString filename = QString("%1%2%3.jpg").arg(user, artist, track);
     filename.remove(" ");

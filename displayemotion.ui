@@ -118,7 +118,7 @@
        </column>
        <column>
         <property name="text">
-         <string>Variance</string>
+         <string>Std Dev</string>
         </property>
        </column>
       </widget>

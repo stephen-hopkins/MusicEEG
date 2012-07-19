@@ -20,7 +20,7 @@ public slots:
     void discardData();
 
 signals:
-    void newUserTrack(QString user, QString artist, QString track, QList< QList<float> > rawEmoData, QList<float> averages, QList<float> changes);
+    void newUserTrack(QString user, QString artist, QString track, QList< QList<float> > rawEmoData, QList< QList<float> > stats);
 
 
 private:

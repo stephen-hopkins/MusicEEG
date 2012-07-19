@@ -2,6 +2,7 @@
 #include <iostream>
 #include "windows.h"
 #include <QCoreApplication>
+#include <cmath>
 
 using namespace std;
 
@@ -71,9 +72,10 @@ void Headset::writeData()
     rawEmoData.append(frustration);
     rawEmoData.append(meditation);
 
-    // calculate averages & change in averages
+    // calculate averages, change in averages, and std devs
     QList<float> averages;
     QList<float> changes;
+    QList<float> stddevs;
 
     for (int n = 0 ; n < 4 ; n++) {
         averages.append(calcAverage(rawEmoData[n]));
@@ -85,7 +87,21 @@ void Headset::writeData()
         changes.append(aveend - avebeginning);
     }
 
-    emit newUserTrack(user, artist, track, rawEmoData, averages, changes);
+    for (int e = 0 ; e < 4 ; e++) {
+        float totalsqdiffs = 0;
+        for (int n = 0 ; n < rawEmoData[e].size() ; n++) {
+            float sqdiff = (rawEmoData[e][n] - averages[e]);
+            sqdiff *= sqdiff;
+            totalsqdiffs += sqdiff;
+        }
+        stddevs.append(sqrt(totalsqdiffs));
+    }
+    QList< QList<float> > stats;
+    stats.append(averages);
+    stats.append(changes);
+    stats.append(stddevs);
+
+    emit newUserTrack(user, artist, track, rawEmoData, stats);
     discardData();
     return;
 }

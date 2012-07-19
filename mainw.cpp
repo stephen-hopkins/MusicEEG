@@ -43,10 +43,10 @@ void MainW::connectSignalsSlots()
     connect(this, SIGNAL(cancelRecording()),
             headset, SLOT(discardData()));
 
-    connect(headset, SIGNAL(newUserTrack(QString,QString,QString,QList< QList<float> >, QList<float>, QList<float>)),
-            db, SLOT(saveUserTrack(QString,QString,QString,QList< QList<float> >, QList<float>, QList<float>)));
-    connect(headset, SIGNAL(newUserTrack(QString,QString,QString,QList<QList<float> >,QList<float>,QList<float>)),
-            displayEmotion, SLOT(updateWindow(QString,QString,QString,QList<QList<float> >,QList<float>,QList<float>)));
+    connect(headset, SIGNAL(newUserTrack(QString,QString,QString,QList< QList<float> >, QList< QList<float> >)),
+            db, SLOT(saveUserTrack(QString,QString,QString,QList< QList<float> >, QList< QList<float> >)));
+    connect(headset, SIGNAL(newUserTrack(QString,QString,QString,QList<QList<float> >,QList< QList<float> >)),
+            displayEmotion, SLOT(updateWindow(QString,QString,QString,QList<QList<float> >,QList< QList<float> >)));
 
     connect(this, SIGNAL(startPlaying(Phonon::MediaSource)),
             musicPlayer, SLOT(startPlaying(Phonon::MediaSource)));
@@ -185,6 +185,7 @@ void MainW::stopButtonPressed()
 
 void MainW::updateTable(QList<QStringList> metaData)
 {   
+    // clear current table
     while (ui->musicTable->rowCount() != 0) {
         ui->musicTable->removeRow(0);
     }

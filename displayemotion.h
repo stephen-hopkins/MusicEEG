@@ -19,7 +19,7 @@ public:
     void setChanges(QList<float>);
 
 public slots:
-    void updateWindow(QString user, QString artist, QString track, QList< QList<float> > rawData, QList<float> averages, QList<float> changes);
+    void updateWindow(QString user, QString artist, QString track, QList< QList<float> > rawData, QList< QList<float> > stats);
 
 signals:
     void pressedOK();
