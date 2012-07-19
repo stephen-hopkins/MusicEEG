@@ -87,14 +87,13 @@ void MainW::addFiles()
  {
     sources.clear();
     QStringList files = QFileDialog::getOpenFileNames(this, tr("Select Music Files"),
-                                                      QDesktopServices::storageLocation(QDesktopServices::MusicLocation));
+                                                      QDesktopServices::storageLocation(QDesktopServices::MusicLocation), "MP3 Files (*.mp3)");
 
     if (files.isEmpty())
         return;
 
     foreach (QString string, files) {
         Phonon::MediaSource source(string);
-
         sources.append(source);
     }
     currentTrack = 0;
