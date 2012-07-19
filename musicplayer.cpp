@@ -15,6 +15,8 @@ MusicPlayer::MusicPlayer()
             this, SIGNAL(tick(qint64)));
     connect(mediaObject, SIGNAL(finished()),
             this, SIGNAL(trackFinished()));
+    connect(mediaObject, SIGNAL(stateChanged(Phonon::State,Phonon::State)),
+            this, SLOT(handleErrors(Phonon::State)));
 
     Phonon::createPath(mediaObject, audioOutput);
 }
@@ -61,4 +63,10 @@ Phonon::AudioOutput* MusicPlayer::getAudioOutputPtr()
     return audioOutput;
 }
 
+void MusicPlayer::handleErrors(Phonon::State newstate)
+{
+    if (newstate == Phonon::ErrorState) {
+            emit errorPlayingTrack();
+    }
+}
 

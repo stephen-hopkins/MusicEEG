@@ -56,6 +56,8 @@ void MainW::connectSignalsSlots()
             this, SLOT(trackFinished()));
     connect(musicPlayer, SIGNAL(tick(qint64)),
             this, SLOT(tick(qint64)));
+    connect(musicPlayer, SIGNAL(errorPlayingTrack()),
+            this, SLOT(skipTrack()));
 
     connect(displayEmotion, SIGNAL(pressedOK()),
             this, SLOT(continuePlaying()));
@@ -250,3 +252,12 @@ void MainW::setVolumeSlider(Phonon::AudioOutput* audio)
     ui->volumeSlider->setAudioOutput(audio);
 }
 
+void MainW::skipTrack()
+{
+    stopButtonPressed();
+    QMessageBox msgBox;
+    QString text = QString("Cannot play file: %1").arg(sources[currentTrack].fileName());
+    msgBox.setText(text);
+    msgBox.exec();
+    continuePlaying();
+}

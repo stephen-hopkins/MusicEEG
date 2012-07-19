@@ -40,6 +40,7 @@ public slots:
     void trackFinished();
     void setVolumeSlider(Phonon::AudioOutput*);
     void continuePlaying();
+    void skipTrack();
 
 signals:
     // handles headset/database

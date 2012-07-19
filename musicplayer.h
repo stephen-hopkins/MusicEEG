@@ -26,10 +26,12 @@ public:
 public slots:
     void startPlaying(Phonon::MediaSource);
     void stopPlaying();
+    void handleErrors(Phonon::State newstate);
 
 signals:
     void trackFinished();
     void tick(qint64);
+    void errorPlayingTrack();
 
 private:
     Phonon::MediaObject* mediaObject;
