@@ -11,6 +11,8 @@ DisplayEmotion::DisplayEmotion(QWidget *parent) :
     ui->setupUi(this);
     connect(ui->okButton, SIGNAL(clicked()),
             this, SIGNAL(pressedOK()));
+    connect(this, SIGNAL(rejected()),
+            this, SIGNAL(pressedOK()));
 
     ui->chart->legend->setVisible(true);
     QFont legendFont = font();

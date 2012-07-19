@@ -26,7 +26,7 @@ Database::Database()
         if (!init.exec()) {
             cerr << "Error creating Users table in database";
         }
-        init.prepare("CREATE TABLE RawData(UTid integer, Second integer primary key autoincrement, Engagement real, Excitement real, Frustration real, Meditation real)");
+        init.prepare("CREATE TABLE RawData(UTid integer, RDid integer primary key autoincrement, Engagement real, Excitement real, Frustration real, Meditation real)");
         if (!init.exec()) {
             cerr << "Error creating RawData table in database";
         }
