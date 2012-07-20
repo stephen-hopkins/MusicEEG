@@ -66,7 +66,7 @@
         <number>3</number>
        </property>
        <attribute name="horizontalHeaderVisible">
-        <bool>false</bool>
+        <bool>true</bool>
        </attribute>
        <attribute name="horizontalHeaderCascadingSectionResizes">
         <bool>true</bool>
@@ -78,7 +78,7 @@
         <number>27</number>
        </attribute>
        <attribute name="verticalHeaderVisible">
-        <bool>false</bool>
+        <bool>true</bool>
        </attribute>
        <attribute name="verticalHeaderDefaultSectionSize">
         <number>42</number>

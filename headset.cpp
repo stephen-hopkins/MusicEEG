@@ -94,7 +94,8 @@ void Headset::writeData()
             sqdiff *= sqdiff;
             totalsqdiffs += sqdiff;
         }
-        stddevs.append(sqrt(totalsqdiffs));
+        float variance = totalsqdiffs / rawEmoData[0].size();
+        stddevs.append(sqrt(variance));
     }
     QList< QList<float> > stats;
     stats.append(averages);
