@@ -24,9 +24,6 @@ public slots:
 signals:
     void pressedOK();
 
-private slots:
-    void on_okButton_clicked();
-
 private:
     Ui::DisplayEmotion *ui;
 };

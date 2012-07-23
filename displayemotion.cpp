@@ -9,8 +9,6 @@ DisplayEmotion::DisplayEmotion(QWidget *parent) :
     ui(new Ui::DisplayEmotion)
 {
     ui->setupUi(this);
-    connect(ui->okButton, SIGNAL(clicked()),
-            this, SIGNAL(pressedOK()));
     connect(this, SIGNAL(rejected()),
             this, SIGNAL(pressedOK()));
 
@@ -75,6 +73,7 @@ void DisplayEmotion::updateWindow(QString user, QString artist, QString track, Q
 
     QString title = QString("User: %1 Track: %2 by %3" ).arg(user, track, artist);
     ui->chart->setTitle(title);
+    ui->chart->yAxis->setRange(0,1);
     ui->chart->replot();
 
     // Update table
@@ -91,12 +90,4 @@ void DisplayEmotion::updateWindow(QString user, QString artist, QString track, Q
     ui->chart->saveJpg(filename);
 
     this->show();
-}
-
-
-
-void DisplayEmotion::on_okButton_clicked()
-{
-    this->hide();
-    emit pressedOK();
 }
