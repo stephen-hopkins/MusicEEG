@@ -82,8 +82,8 @@ void Headset::writeData()
     }
 
     for (int n = 0 ; n < 4 ; n++) {
-        float avebeginning = calcAverage(rawEmoData[n].mid(0, 30));
-        float aveend = calcAverage(rawEmoData[n].mid((rawEmoData[n].length())-30, 30 ));
+        float avebeginning = calcAverage(rawEmoData[n].mid(0, 10));
+        float aveend = calcAverage(rawEmoData[n].mid((rawEmoData[n].length())-20, 10 ));
         changes.append(aveend - avebeginning);
     }
 
