@@ -119,9 +119,3 @@ QStringList Database::getUsers()
     }
     return users;
 }
-
-void Database::correctChanges()
-{
-    QSqlQuery userTracks(db);
-    userTracks.prepare(QString("SELECT UTid FROM UserTracks"))
-}

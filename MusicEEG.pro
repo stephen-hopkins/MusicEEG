@@ -20,7 +20,8 @@ SOURCES += main.cpp\
     database.cpp \
     musicplayer.cpp \
     qcustomplot.cpp \
-    displayemotion.cpp
+    displayemotion.cpp \
+    recommender.cpp
 
 HEADERS  += mainw.h \
     headset.h \
@@ -30,7 +31,8 @@ HEADERS  += mainw.h \
     database.h \
     musicplayer.h \
     qcustomplot.h \
-    displayemotion.h
+    displayemotion.h \
+    recommender.h
 
 FORMS    += mainw.ui \
     displayemotion.ui
