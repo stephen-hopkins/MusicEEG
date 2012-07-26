@@ -13,6 +13,7 @@ public:
     Database();
     ~Database();
     QStringList getUsers();
+    QSqlQuery getAllRecords();
 
 public slots:
 

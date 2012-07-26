@@ -119,3 +119,10 @@ QStringList Database::getUsers()
     }
     return users;
 }
+
+QSqlQuery Database::getAllRecords()
+{
+    QSqlQuery utQuery(db);
+    utQuery.exec("SELECT UTid, User, Artist, Track, MeanEng, MeanExc, MeanFrus, MeanMed, ChaEng, ChaExc, ChaFrus, ChaMed, SDEng, SDExc, SDFrus, SDMed FROM UserTracks");
+    return utQuery;
+}

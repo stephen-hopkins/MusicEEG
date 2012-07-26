@@ -16,6 +16,12 @@ MainW::MainW(QWidget *parent) :
     musicPlayer = new MusicPlayer();
     displayEmotion = new DisplayEmotion();
 
+    // debugging
+    Recommender r(db);
+    //QMultiMap<float, QStringList> diffs = r.getSimilar(1);
+    //QList<QStringList> results = diffs.values();
+    //QStringList top = results[0];
+
     user = "NO USER SELECTED";
     currentTrack = 0;
 

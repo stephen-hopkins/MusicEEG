@@ -11,6 +11,7 @@
 #include "database.h"
 #include "musicplayer.h"
 #include "displayemotion.h"
+#include "recommender.h"
 
 namespace Ui {
 class MainW;
