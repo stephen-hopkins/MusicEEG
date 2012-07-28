@@ -42,6 +42,7 @@ public slots:
     void setVolumeSlider(Phonon::AudioOutput*);
     void continuePlaying();
     void skipTrack();
+    void showRecords();
 
 signals:
     // handles headset/database
@@ -63,16 +64,19 @@ private:
     int currentTrack;
     QList<Phonon::MediaSource> sources;
     QString user;
+    bool recordingMode;
 
     Database* db;
     Headset* headset;
     MusicPlayer* musicPlayer;
     DisplayEmotion* displayEmotion;
+    Recommender* recommender;
 
     void setupActions();
-    void setupUsers();
+    void setupComboBox();
     void connectSignalsSlots();
     void updateTable(QList<QStringList>);
+    void setupMusicTable();
 
 };
 

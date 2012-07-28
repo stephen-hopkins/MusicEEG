@@ -2,6 +2,7 @@
 #include "ui_mainw.h"
 #include <iostream>
 #include <QInputDialog>
+#include <QSqlQuery>
 
 using namespace std;
 
@@ -15,20 +16,16 @@ MainW::MainW(QWidget *parent) :
     headset = new Headset();
     musicPlayer = new MusicPlayer();
     displayEmotion = new DisplayEmotion();
-
-    // debugging
-    Recommender r(db);
-    //QMultiMap<float, QStringList> diffs = r.getSimilar(1);
-    //QList<QStringList> results = diffs.values();
-    //QStringList top = results[0];
+    recommender = new Recommender(db);
 
     user = "NO USER SELECTED";
     currentTrack = 0;
+    recordingMode = true;
 
     headsetTimer = new QTimer();
 
     setupActions();
-    setupUsers();
+    setupComboBox();
     connectSignalsSlots();
 
     ui->timeLcd->display("00:00");
@@ -79,18 +76,30 @@ MainW::~MainW()
     delete headset;
     delete musicPlayer;
     delete displayEmotion;
+    delete recommender;
 }
 
-void MainW::setupUsers()
+void MainW::setupComboBox()
 {
-    QStringList users = db->getUsers();
-    users.append("Add New User");
-    ui->comboBoxUsers->insertItems(0, users);
-    user = ui->comboBoxUsers->currentText();
+    if (recordingMode == true) {
+        QStringList users = db->getUsers();
+        users.append("Add New User");
+        ui->comboBox->insertItems(0, users);
+        user = ui->comboBox->currentText();
+    }
+    else {
+        QStringList recOptions;
+        recOptions << "Own Cont" << "Other Cont" << "Own Disc" << "Other Disc";
+        ui->comboBox->insertItems(0, recOptions);
+    }
 }
 
 void MainW::addFiles()
  {
+    if (recordingMode == false) {
+        recordingMode = true;
+        setupMusicTable();
+    }
     sources.clear();
     QStringList files = QFileDialog::getOpenFileNames(this, tr("Select Music Files"),
                                                       QDesktopServices::storageLocation(QDesktopServices::MusicLocation), "MP3 Files (*.mp3)");
@@ -104,7 +113,8 @@ void MainW::addFiles()
     }
     currentTrack = 0;
     updateTable(musicPlayer->getMetaData(sources));
-
+    ui->actionPlay->setEnabled(true);
+    ui->actionStop->setEnabled(false);
  }
 
 void MainW::about()
@@ -122,6 +132,7 @@ void MainW::tick(qint64 time)
 
 void MainW::tableClicked(int row, int /* column */)
  {
+    if (recordingMode == true) {
      emit stopPlaying();
      emit cancelRecording();
 
@@ -130,6 +141,7 @@ void MainW::tableClicked(int row, int /* column */)
 
      currentTrack = row;
      startButtonPressed();
+    }
  }
 
 void MainW::setupActions()
@@ -152,6 +164,8 @@ void MainW::setupActions()
             qApp, SLOT(aboutQt()));
     connect(ui->musicTable, SIGNAL(cellPressed(int,int)),
             this, SLOT(tableClicked(int,int)));
+    connect(ui->actionShowRecords, SIGNAL(triggered()),
+            this, SLOT(showRecords()));
      return;
  }
 
@@ -162,6 +176,8 @@ void MainW::startButtonPressed()
 
     ui->musicTable->selectRow(currentTrack);
     ui->timeLcd->display("00:00");
+    ui->actionPlay->setEnabled(false);
+    ui->actionPlay->setEnabled(true);
 
     emit startRecording(user, artist, track);
     emit logEmoState();
@@ -186,6 +202,8 @@ void MainW::continuePlaying()
 void MainW::stopButtonPressed()
 {
     headsetTimer->stop();
+    ui->actionPlay->setEnabled(true);
+    ui->actionStop->setEnabled(false);
     emit cancelRecording();
     emit stopPlaying();
 }
@@ -238,11 +256,11 @@ void MainW::userSelectionMade(QString userSelection)
             if (ok && !newUser.isEmpty() && !users.contains(newUser, Qt::CaseInsensitive)) {
                 user = newUser;
                 db->saveNewUser(newUser);
-                int itemsPre = ui->comboBoxUsers->count();
-                ui->comboBoxUsers->removeItem(itemsPre - 1);
-                ui->comboBoxUsers->addItem(newUser);
-                ui->comboBoxUsers->addItem("Add New User");
-                ui->comboBoxUsers->setCurrentIndex(itemsPre - 1);
+                int itemsPre = ui->comboBox->count();
+                ui->comboBox->removeItem(itemsPre - 1);
+                ui->comboBox->addItem(newUser);
+                ui->comboBox->addItem("Add New User");
+                ui->comboBox->setCurrentIndex(itemsPre - 1);
                 validUsernameChosen = true;
             }
         }
@@ -266,3 +284,51 @@ void MainW::skipTrack()
     msgBox.exec();
     continuePlaying();
 }
+
+void MainW::showRecords()
+{
+    recordingMode = false;
+    setupMusicTable();
+    ui->actionPlay->setEnabled(false);
+    ui->actionPlay->setEnabled(false);
+
+    QSqlQuery userTracks = db->getAllRecords();
+    if (!userTracks.isActive()) {
+        QMessageBox msgBox;
+        msgBox.setText("Fatal Error : Cannot retrieve records from database");
+        msgBox.exec();
+    }
+
+    int row = 0;
+    while (userTracks.next()) {
+        ui->musicTable->insertRow(row);
+        for (int n = 1 ; n < 16 ; n++) {
+            QTableWidgetItem* newItem = new QTableWidgetItem(userTracks.value(n).toString());
+            newItem->setFlags(Qt::ItemIsSelectable);
+            ui->musicTable->setItem(row, n-1, newItem);
+        }
+        row++;
+    }
+}
+
+void MainW::setupMusicTable() {
+
+    ui->musicTable->clear();
+    QStringList headers;
+
+    if (recordingMode == true) {
+        ui->musicTable->setColumnCount(4);
+        ui->musicTable->setRowCount(0);
+        headers << "Artist" << "Track" << "Album" << "Year";
+
+    }
+    else {
+        ui->musicTable->setColumnCount(15);
+        ui->musicTable->setRowCount(0);
+        headers << "User" << "Artist" << "Track" << "MeanEng" << "MeanExc" << "MeanFrus" << "MeanMed";
+        headers << "ChaEng" << "ChaExc" << "ChaFrus" << "ChaMed" << "SDEng" << "SDExc" << "SDFrus" << "SDMed";
+    }
+
+    ui->musicTable->setHorizontalHeaderLabels(headers);
+}
+

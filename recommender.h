@@ -8,8 +8,13 @@ class Recommender
 {
 public:
     Recommender(Database* d);
-    QMultiMap<float, QStringList> getSimilar(int UTid);
+    QMultiMap<float, QStringList> getSimilarByScores(int UTid);
+    QMultiMap<int, QStringList> getSimilarByHYs(int UTid);
+    QMultiMap<float, QStringList> getRecommendationsCont(int UTid);
+    QMultiMap<int, QStringList> getRecommendationsDisc(int UTid);
+
 private:
+
     Database* db;
     QList<QStringList> details;
     QList< QList<float> > stats;
