@@ -120,16 +120,24 @@ QMultiMap<float, QStringList> Recommender::getSimilarByScores(int UTid)
     return results;
 }
 
-QMultiMap<float, QStringList> Recommender::getRecommendationsCont(int UTid)
+void Recommender::getRecommendationsOwnCont(int row)
 {
+    int utID = validUTIDs[row];
+    QMultiMap<float, QStringList> results = getSimilarByScores(utID);
+    emit newRecs(results);
+}
+
+void Recommender::getRecommendationsCont(int row)
+{
+    int utID = validUTIDs[row];
     QList<int> sameTrackDiffUsers;
     QMultiMap<float, QStringList> results;
 
     QList<int>::const_iterator i;
     for (i = validUTIDs.begin() ; i != validUTIDs.end() ; i++) {
-        if (*i != UTid) {
-            if ( (details[UTid][1] == details[*i][1]) && (details[UTid][2] == details[UTid][2]) ) {
-                if (details[UTid][0] != details[*i][0]) {
+        if (*i != utID) {
+            if ( (details[utID][1] == details[*i][1]) && (details[utID][2] == details[utID][2]) ) {
+                if (details[utID][0] != details[*i][0]) {
                     sameTrackDiffUsers << *i;
                 }
             }
@@ -146,7 +154,7 @@ QMultiMap<float, QStringList> Recommender::getRecommendationsCont(int UTid)
         results += getSimilarByScores(sameTrackDiffUsers.takeFirst());
     }
 
-    return results;
+    emit newRecs(results);
 }
 
 QMultiMap<int, QStringList> Recommender::getSimilarByHYs(int UTid)
@@ -173,16 +181,24 @@ QMultiMap<int, QStringList> Recommender::getSimilarByHYs(int UTid)
     return results;
 }
 
-QMultiMap<int, QStringList> Recommender::getRecommendationsDisc(int UTid)
+void Recommender::getRecommendationsOwnDisc(int row)
 {
+    int utID = validUTIDs[row];
+    QMultiMap<int, QStringList> results = getSimilarByHYs(utID);
+    emit newRecs(results);
+}
+
+void Recommender::getRecommendationsDisc(int row)
+{
+    int utID = validUTIDs[row];
     QList<int> sameTrackDiffUsers;
     QMultiMap<int, QStringList> results;
 
     QList<int>::const_iterator i;
     for (i = validUTIDs.begin() ; i != validUTIDs.end() ; i++) {
-        if (*i != UTid) {
-            if ( (details[UTid][1] == details[*i][1]) && (details[UTid][2] == details[UTid][2]) ) {
-                if (details[UTid][0] != details[*i][0]) {
+        if (*i != utID) {
+            if ( (details[utID][1] == details[*i][1]) && (details[utID][2] == details[utID][2]) ) {
+                if (details[utID][0] != details[*i][0]) {
                     sameTrackDiffUsers << *i;
                 }
             }
@@ -198,6 +214,6 @@ QMultiMap<int, QStringList> Recommender::getRecommendationsDisc(int UTid)
     while (!sameTrackDiffUsers.isEmpty()) {
         results += getSimilarByHYs(sameTrackDiffUsers.takeFirst());
     }
-    return results;
+    emit newRecs(results);
 }
 

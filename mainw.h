@@ -12,6 +12,7 @@
 #include "musicplayer.h"
 #include "displayemotion.h"
 #include "recommender.h"
+#include "displayrecs.h"
 
 namespace Ui {
 class MainW;
@@ -71,6 +72,7 @@ private:
     MusicPlayer* musicPlayer;
     DisplayEmotion* displayEmotion;
     Recommender* recommender;
+    DisplayRecs* displayRecs;
 
     void setupActions();
     void setupComboBox();

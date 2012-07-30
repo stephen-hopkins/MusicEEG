@@ -3,15 +3,20 @@
 
 #include "database.h"
 #include <QMultiMap>
+#include <QObject>
+#include <QStringList>
 
-class Recommender
+class Recommender : public QObject
 {
+    Q_OBJECT
 public:
+
     Recommender(Database* d);
-    QMultiMap<float, QStringList> getSimilarByScores(int UTid);
-    QMultiMap<int, QStringList> getSimilarByHYs(int UTid);
-    QMultiMap<float, QStringList> getRecommendationsCont(int UTid);
-    QMultiMap<int, QStringList> getRecommendationsDisc(int UTid);
+
+    void getRecommendationsCont(int);
+    void getRecommendationsDisc(int);
+    void getRecommendationsOwnCont(int);
+    void getRecommendationsOwnDisc(int);
 
 private:
 
@@ -23,6 +28,13 @@ private:
 
     void setupDetailsStatsUTIDs();
     void setupHighLows();
+
+    QMultiMap<float, QStringList> getSimilarByScores(int UTid);
+    QMultiMap<int, QStringList> getSimilarByHYs(int UTid);
+
+signals:
+    void newRecs(QMultiMap<float, QStringList>);
+    void newRecs(QMultiMap<int, QStringList>);
 
 };
 

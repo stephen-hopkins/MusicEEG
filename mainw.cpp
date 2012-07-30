@@ -17,6 +17,7 @@ MainW::MainW(QWidget *parent) :
     musicPlayer = new MusicPlayer();
     displayEmotion = new DisplayEmotion();
     recommender = new Recommender(db);
+    displayRecs = new DisplayRecs();
 
     user = "NO USER SELECTED";
     currentTrack = 0;
@@ -65,6 +66,11 @@ void MainW::connectSignalsSlots()
     connect(displayEmotion, SIGNAL(pressedOK()),
             this, SLOT(continuePlaying()));
 
+    connect(recommender, SIGNAL(newRecs(QMultiMap<float,QStringList>)),
+             displayRecs, SLOT(updateTable(QMultiMap<float,QStringList>)));
+    connect(recommender, SIGNAL(newRecs(QMultiMap<int,QStringList>)),
+             displayRecs, SLOT(updateTable(QMultiMap<int,QStringList>)));
+
 }
 
 
@@ -77,10 +83,13 @@ MainW::~MainW()
     delete musicPlayer;
     delete displayEmotion;
     delete recommender;
+    delete displayRecs;
 }
 
 void MainW::setupComboBox()
 {
+    ui->comboBox->clear();
+
     if (recordingMode == true) {
         QStringList users = db->getUsers();
         users.append("Add New User");
@@ -99,6 +108,7 @@ void MainW::addFiles()
     if (recordingMode == false) {
         recordingMode = true;
         setupMusicTable();
+        setupComboBox();
     }
     sources.clear();
     QStringList files = QFileDialog::getOpenFileNames(this, tr("Select Music Files"),
@@ -131,18 +141,33 @@ void MainW::tick(qint64 time)
  }
 
 void MainW::tableClicked(int row, int /* column */)
- {
-    if (recordingMode == true) {
-     emit stopPlaying();
-     emit cancelRecording();
+{
+    if (recordingMode) {
+        emit stopPlaying();
+        emit cancelRecording();
 
-     if (row >= sources.size())
-         return;
+        if (row >= sources.size())
+            return;
 
-     currentTrack = row;
-     startButtonPressed();
+        currentTrack = row;
+        startButtonPressed();
     }
- }
+    else {
+        QString recMethod = ui->comboBox->currentText();
+        if (recMethod == "Own Cont") {
+            recommender->getRecommendationsOwnCont(row);
+        }
+        else if (recMethod == "Other Cont") {
+            recommender->getRecommendationsCont(row);
+        }
+        else if (recMethod == "Own Disc") {
+            recommender->getRecommendationsOwnDisc(row);
+        }
+        else if (recMethod == "Other Disc") {
+            recommender->getRecommendationsDisc(row);
+        }
+    }
+}
 
 void MainW::setupActions()
  {
@@ -162,7 +187,7 @@ void MainW::setupActions()
             this, SLOT(about()));
     connect(ui->actionAboutQT, SIGNAL(triggered()),
             qApp, SLOT(aboutQt()));
-    connect(ui->musicTable, SIGNAL(cellPressed(int,int)),
+    connect(ui->musicTable, SIGNAL(cellDoubleClicked(int,int)),
             this, SLOT(tableClicked(int,int)));
     connect(ui->actionShowRecords, SIGNAL(triggered()),
             this, SLOT(showRecords()));
@@ -177,7 +202,7 @@ void MainW::startButtonPressed()
     ui->musicTable->selectRow(currentTrack);
     ui->timeLcd->display("00:00");
     ui->actionPlay->setEnabled(false);
-    ui->actionPlay->setEnabled(true);
+    ui->actionStop->setEnabled(true);
 
     emit startRecording(user, artist, track);
     emit logEmoState();
@@ -289,6 +314,7 @@ void MainW::showRecords()
 {
     recordingMode = false;
     setupMusicTable();
+    setupComboBox();
     ui->actionPlay->setEnabled(false);
     ui->actionPlay->setEnabled(false);
 
@@ -304,7 +330,7 @@ void MainW::showRecords()
         ui->musicTable->insertRow(row);
         for (int n = 1 ; n < 16 ; n++) {
             QTableWidgetItem* newItem = new QTableWidgetItem(userTracks.value(n).toString());
-            newItem->setFlags(Qt::ItemIsSelectable);
+            newItem->setFlags(newItem->flags() ^ Qt::ItemIsEditable);
             ui->musicTable->setItem(row, n-1, newItem);
         }
         row++;
