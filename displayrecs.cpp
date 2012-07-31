@@ -21,7 +21,7 @@ void DisplayRecs::updateTable(QMultiMap<float, QStringList> recs)
 
     while (!scores.isEmpty()) {
 
-        float currentScore = scores.takeLast();
+        float currentScore = scores.takeFirst();
         QList<QStringList> uATs = recs.values(currentScore);
 
         while (!uATs.isEmpty()) {
@@ -54,7 +54,7 @@ void DisplayRecs::updateTable(QMultiMap<int, QStringList> recs)
 
     while (!scores.isEmpty()) {
 
-        int currentScore = scores.takeLast();
+        int currentScore = scores.takeFirst();
         QList<QStringList> uATs = recs.values(currentScore);
 
         while (!uATs.isEmpty()) {
