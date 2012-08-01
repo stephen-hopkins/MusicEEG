@@ -213,6 +213,7 @@ void MainW::startButtonPressed()
 void MainW::trackFinished()
 {
     headsetTimer->stop();
+
     emit stopRecording();
 }
 

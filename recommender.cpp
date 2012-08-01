@@ -217,3 +217,43 @@ void Recommender::getRecommendationsDisc(int row)
     emit newRecs(results);
 }
 
+
+
+
+
+void Recommender::calcLikesThreshold(QString user)
+{
+    // create sorted list of scores (all 4 std devs added together)
+    QMultiMap<float, int> utIDsByStddev;
+    QList<int>::const_iterator i;
+    for (i = validUTIDs.begin() ; i != validUTIDs.end() ; i++) {
+        if (details[*i][0] == user) {
+            float totalStddevs = 0;
+            for (int n = 8 ; n < 12 ; n++) {
+                totalStddevs += stats[*i][n];
+            }
+            utIDsByStddev.insert(totalStddevs, *i);
+        }
+    }
+
+    // set threshold to initial value of 0.3
+    float threshold = 0.3;
+
+    threshold = calcLikesThresholdHelper(utIDsByStddev, false, false, threshold);
+  }
+
+void Recommender::calcLikesThresholdHelper(QMultiMap<float, int> utIDsByStddev, bool higher, bool lower, float threshold)
+{
+    // calc what thresholds would have to be to change classifications by 1
+    // if moved higher, check if going higher improves classifications
+    // if moved lower, check if going lower improves classifications
+    // if neither return current
+
+    QList<float> scores = utIDsByStddev.keys();
+    for ()
+
+
+    // calc % of examples correctly classified
+
+    // change threshold, rinse and repeat
+}

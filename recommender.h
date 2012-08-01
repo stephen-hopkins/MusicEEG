@@ -21,8 +21,13 @@ public:
 private:
 
     Database* db;
+
+    // details, indexed by UTid, User, Artist, Track
     QList<QStringList> details;
+
+    // stats Mean Engagement, Excitement, Frustration, Meditation.  Then change, then Std Devs.
     QList< QList<float> > stats;
+
     QList<int> validUTIDs;
     char** highlows;
 
