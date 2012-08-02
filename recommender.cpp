@@ -242,15 +242,39 @@ void Recommender::calcLikesThreshold(QString user)
     threshold = calcLikesThresholdHelper(utIDsByStddev, false, false, threshold);
   }
 
-void Recommender::calcLikesThresholdHelper(QMultiMap<float, int> utIDsByStddev, bool higher, bool lower, float threshold)
+float Recommender::calcLikesThresholdHelper(QMultiMap<float, int> utIDsByStddev, bool higher, bool lower, float threshold, int currentCorrect)
 {
     // calc what thresholds would have to be to change classifications by 1
     // if moved higher, check if going higher improves classifications
     // if moved lower, check if going lower improves classifications
     // if neither return current
 
-    QList<float> scores = utIDsByStddev.keys();
-    for ()
+    QList<float> stddevs = utIDsByStddev.keys();
+    QList<float>::const_iterator below;
+    QList<float>::const_iterator above;
+
+    for (below = stddevs.begin() ; *below < threshold ; below++) {}
+    below--;
+    for (above = stddevs.end() - 1 ; *above > threshold ; above--) {}
+    above ++;
+
+    float lowerThreshold = (*below + *(below-1)) / 2;
+    float higherThreshold = (*above + *(above+1)) / 2;
+
+    int belowCorrect = noCorrectlyClassified(lowerThreshold);
+    int aboveCorrect = noCorrectlyClassified(higherThreshold);
+
+    if (belowCorrect >= currentCorrect) {
+        return calcLikesThresholdHelper(utIDsByStddev, false, true, lowerThreshold, belowCorrect);
+    }
+    else if (aboveCorrect <= currentCorrect) {
+        return calcLikesThresholdHelper(utIDsByStddev, true, false, higherThreshold, belowCorrect);
+    }
+    else {
+        return threshold;
+    }
+
+
 
 
     // calc % of examples correctly classified
