@@ -14,6 +14,7 @@ public:
     ~Database();
     QStringList getUsers();
     QSqlQuery getAllRecords();
+    QSqlQuery getAllUsers();
 
 public slots:
 

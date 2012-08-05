@@ -9,6 +9,9 @@ Recommender::Recommender(Database* d) : db(d)
 {
     setupDetailsStatsUTIDs();
     setupHighLows();
+    setupThresholds();
+
+    testing();
 
     // debugging
 
@@ -23,6 +26,26 @@ Recommender::Recommender(Database* d) : db(d)
         }
         std::cout << std::endl;
     }
+
+
+
+
+}
+
+void Recommender::testing()
+{
+    // should be true false true
+    bool tool1, tool2, tool3;
+    tool1 = classify(5, 0.25);
+    tool2 = classify(5, 0.35);
+    tool3 = classify(16, 0.1);
+
+    // should be 14, 9, 2
+
+    int bint1, bint2, bint3;
+    bint1 = noCorrectlyClassified("Steve", 0.1);
+    bint2 = noCorrectlyClassified("Steve", 0.3);
+    bint3 = noCorrectlyClassified("Steve", 0.7);
 
 }
 
@@ -47,6 +70,7 @@ void Recommender::setupDetailsStatsUTIDs()
         while (UTid > currentIndex) {
             details << emptyQStringList;
             stats << emptyFloatList;
+            liked << false;
             currentIndex++;
         }
 
@@ -61,9 +85,13 @@ void Recommender::setupDetailsStatsUTIDs()
             theseStats << userTracks.value(n).toFloat();
         }
 
+        int bint = userTracks.value(16).toInt();
+        bool userLiked = userTracks.value(16).toBool();
+
         // Add to appropriate lists, rinse and repeat
         details << theseDetails;
         stats << theseStats;
+        liked << userLiked;
         currentIndex++;
         validUTIDs << UTid;
     }
@@ -95,6 +123,28 @@ void Recommender::setupHighLows()
         for (int n = noRecords - 1 ; n >=  noRecords-(noRecords/3) ; n--) {
             highlows[orderedUTids[n]][metric] = 'H';
         }
+    }
+}
+
+void Recommender::setupThresholds()
+{
+    QSqlQuery usersQuery = db->getAllUsers();
+
+    if (!usersQuery.isActive()) {
+        QMessageBox msgBox;
+        msgBox.setText("Fatal Error : Cannot retrieve records from database");
+        msgBox.exec();
+    }
+    int currentIndex = 0;
+    while (usersQuery.next()) {
+        int Uid = usersQuery.value(0).toInt();
+        while (Uid > currentIndex) {
+            thresholds.append(0.0);
+            currentIndex++;
+        }
+        QString user = usersQuery.value(1).toString();
+        thresholds.append(calcLikesThreshold(user));
+        currentIndex++;
     }
 }
 
@@ -221,7 +271,7 @@ void Recommender::getRecommendationsDisc(int row)
 
 
 
-void Recommender::calcLikesThreshold(QString user)
+float Recommender::calcLikesThreshold(QString user)
 {
     // create sorted list of scores (all 4 std devs added together)
     QMultiMap<float, int> utIDsByStddev;
@@ -238,11 +288,12 @@ void Recommender::calcLikesThreshold(QString user)
 
     // set threshold to initial value of 0.3
     float threshold = 0.3;
+    int currentCorrect = noCorrectlyClassified(user, threshold);
 
-    threshold = calcLikesThresholdHelper(utIDsByStddev, false, false, threshold);
+    return calcLikesThresholdHelper(user, utIDsByStddev, false, false, threshold, currentCorrect);
   }
 
-float Recommender::calcLikesThresholdHelper(QMultiMap<float, int> utIDsByStddev, bool higher, bool lower, float threshold, int currentCorrect)
+float Recommender::calcLikesThresholdHelper(QString user, QMultiMap<float, int> utIDsByStddev, bool higher, bool lower, float threshold, int currentCorrect)
 {
     // calc what thresholds would have to be to change classifications by 1
     // if moved higher, check if going higher improves classifications
@@ -253,31 +304,48 @@ float Recommender::calcLikesThresholdHelper(QMultiMap<float, int> utIDsByStddev,
     QList<float>::const_iterator below;
     QList<float>::const_iterator above;
 
-    for (below = stddevs.begin() ; *below < threshold ; below++) {}
-    below--;
-    for (above = stddevs.end() - 1 ; *above > threshold ; above--) {}
-    above ++;
-
-    float lowerThreshold = (*below + *(below-1)) / 2;
-    float higherThreshold = (*above + *(above+1)) / 2;
-
-    int belowCorrect = noCorrectlyClassified(lowerThreshold);
-    int aboveCorrect = noCorrectlyClassified(higherThreshold);
-
-    if (belowCorrect >= currentCorrect) {
-        return calcLikesThresholdHelper(utIDsByStddev, false, true, lowerThreshold, belowCorrect);
-    }
-    else if (aboveCorrect <= currentCorrect) {
-        return calcLikesThresholdHelper(utIDsByStddev, true, false, higherThreshold, belowCorrect);
-    }
-    else {
-        return threshold;
+    if (!higher) {
+        for (below = stddevs.begin() ; *below < threshold ; below++) {}
+        below--;
+        float lowerThreshold = (*below + *(below-1)) / 2;
+        int belowCorrect = noCorrectlyClassified(user, lowerThreshold);
+        if (belowCorrect >= currentCorrect) {
+            return calcLikesThresholdHelper(user, utIDsByStddev, false, true, lowerThreshold, belowCorrect);
+        }
     }
 
-
-
-
-    // calc % of examples correctly classified
-
-    // change threshold, rinse and repeat
+    if (!lower) {
+        for (above = stddevs.end() - 1 ; *above > threshold ; above--) {}
+        above ++;
+        float higherThreshold = (*above + *(above+1)) / 2;
+        int aboveCorrect = noCorrectlyClassified(user, higherThreshold);
+        if (aboveCorrect <= currentCorrect) {
+            return calcLikesThresholdHelper(user, utIDsByStddev, true, false, higherThreshold, aboveCorrect);
+        }
+    }
+    return threshold;
 }
+
+int Recommender::noCorrectlyClassified(QString user, float threshold)
+{
+    int noCorrect = 0;
+    for (int utID = 0 ; utID < details.size() ; utID++) {
+        if (details[utID].isEmpty() || details[utID][0] != user) {
+            continue;
+        }
+        else if (classify(utID, threshold) == liked[utID]) {
+            noCorrect++;
+        }
+    }
+    return noCorrect;
+}
+
+bool Recommender::classify(int utID, float threshold)
+{
+    float total = 0;
+    for (int n = 8 ; n < 12 ; n++) {
+        total += stats[utID][n];
+    }
+    return (total >= threshold);
+}
+

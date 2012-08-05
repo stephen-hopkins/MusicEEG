@@ -123,6 +123,13 @@ QStringList Database::getUsers()
 QSqlQuery Database::getAllRecords()
 {
     QSqlQuery utQuery(db);
-    utQuery.exec("SELECT UTid, User, Artist, Track, MeanEng, MeanExc, MeanFrus, MeanMed, ChaEng, ChaExc, ChaFrus, ChaMed, SDEng, SDExc, SDFrus, SDMed FROM UserTracks");
+    utQuery.exec("SELECT UTid, User, Artist, Track, MeanEng, MeanExc, MeanFrus, MeanMed, ChaEng, ChaExc, ChaFrus, ChaMed, SDEng, SDExc, SDFrus, SDMed, Likes FROM UserTracks");
     return utQuery;
+}
+
+QSqlQuery Database::getAllUsers()
+{
+    QSqlQuery users(db);
+    users.exec("SELECT Uid, User FROM Users");
+    return users;
 }
