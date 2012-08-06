@@ -9,26 +9,9 @@ Recommender::Recommender(Database* d) : db(d)
 {
     setupDetailsStatsUTIDs();
     setupHighLows();
-    setupThresholds();
+    //setupThresholds();
 
     testing();
-
-    // debugging
-
-    int noRecords = validUTIDs.size();
-    int highestUTID = validUTIDs[noRecords-1];
-
-    std::cout << "highlows: " << std::endl;
-
-    for (int ut = 0 ; ut < highestUTID+1 ; ut++) {
-        for (int metric = 0 ; metric < 12 ; metric++) {
-            std::cout << highlows[ut][metric] << " ";
-        }
-        std::cout << std::endl;
-    }
-
-
-
 
 }
 
@@ -41,12 +24,14 @@ void Recommender::testing()
     tool3 = classify(16, 0.1);
 
     // should be 14, 9, 2
-
     int bint1, bint2, bint3;
     bint1 = noCorrectlyClassified("Steve", 0.1);
     bint2 = noCorrectlyClassified("Steve", 0.3);
     bint3 = noCorrectlyClassified("Steve", 0.7);
 
+    // should be around 0.3
+    float boat = calcLikesThreshold("Steve");
+    std::cout << boat;
 }
 
 void Recommender::setupDetailsStatsUTIDs()
@@ -274,7 +259,7 @@ void Recommender::getRecommendationsDisc(int row)
 float Recommender::calcLikesThreshold(QString user)
 {
     // create sorted list of scores (all 4 std devs added together)
-    QMultiMap<float, int> utIDsByStddev;
+    QMap<float, int> utIDsByStddev;
     QList<int>::const_iterator i;
     for (i = validUTIDs.begin() ; i != validUTIDs.end() ; i++) {
         if (details[*i][0] == user) {
@@ -286,12 +271,32 @@ float Recommender::calcLikesThreshold(QString user)
         }
     }
 
+    // add 0 and 1 to sorted list, and create second list of possible threshold values
+    utIDsByStddev.insert(0.0, 0);
+    utIDsByStddev.insert(1.0, 0);
+
+    QMap<int,float> thresholdsByNoCorrect;
+
+    QMap<float,int>::const_iterator it = utIDsByStddev.constBegin();
+    it++;
+    while (it != (utIDsByStddev.constEnd() - 1) ) {
+        float thres = it.key() - ((it.key() - (it-1).key()) / 2);
+        thresholdsByNoCorrect.insert(noCorrectlyClassified(user, thres), thres);
+        it++;
+    }
+
+    QMap<int, float>::const_iterator last = thresholdsByNoCorrect.constEnd() - 1;
+    return last.value();
+}
+
+/* OLD CODE
     // set threshold to initial value of 0.3
-    float threshold = 0.3;
+    float threshold = 0.05;
     int currentCorrect = noCorrectlyClassified(user, threshold);
 
     return calcLikesThresholdHelper(user, utIDsByStddev, false, false, threshold, currentCorrect);
-  }
+
+    */
 
 float Recommender::calcLikesThresholdHelper(QString user, QMultiMap<float, int> utIDsByStddev, bool higher, bool lower, float threshold, int currentCorrect)
 {
@@ -301,25 +306,37 @@ float Recommender::calcLikesThresholdHelper(QString user, QMultiMap<float, int> 
     // if neither return current
 
     QList<float> stddevs = utIDsByStddev.keys();
-    QList<float>::const_iterator below;
-    QList<float>::const_iterator above;
 
-    if (!higher) {
-        for (below = stddevs.begin() ; *below < threshold ; below++) {}
+
+    // check correct if threshold one lower
+    if (!higher && (threshold > stddevs.first()) ) {
+        QList<float>::const_iterator below;
+        for (below = stddevs.begin() ; (*below < threshold) && (below != stddevs.end()) ; below++) {
+            float hello = *below;
+            std::cout << hello;
+        }
         below--;
+
+        //debug
+        float deboat = *below;
+
         float lowerThreshold = (*below + *(below-1)) / 2;
         int belowCorrect = noCorrectlyClassified(user, lowerThreshold);
-        if (belowCorrect >= currentCorrect) {
+        if (belowCorrect > currentCorrect) {
             return calcLikesThresholdHelper(user, utIDsByStddev, false, true, lowerThreshold, belowCorrect);
         }
     }
 
-    if (!lower) {
-        for (above = stddevs.end() - 1 ; *above > threshold ; above--) {}
-        above ++;
+    // check correct if threshold one higher
+    if (!lower && (threshold < stddevs.last())) {
+        QList<float>::const_iterator above;
+        for (above = stddevs.end() - 1 ; (*above > threshold) && (above != stddevs.begin()) ; above--) {}
+        if (above != stddevs.begin()) {
+            above ++;
+        }
         float higherThreshold = (*above + *(above+1)) / 2;
         int aboveCorrect = noCorrectlyClassified(user, higherThreshold);
-        if (aboveCorrect <= currentCorrect) {
+        if (aboveCorrect < currentCorrect) {
             return calcLikesThresholdHelper(user, utIDsByStddev, true, false, higherThreshold, aboveCorrect);
         }
     }
