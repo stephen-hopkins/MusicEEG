@@ -44,6 +44,7 @@ public slots:
     void continuePlaying();
     void skipTrack();
     void showRecords();
+    void showRecs();
 
 signals:
     // handles headset/database

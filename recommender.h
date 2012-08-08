@@ -13,12 +13,9 @@ public:
 
     Recommender(Database* d);
 
-    void getRecommendationsCont(int);
-    void getRecommendationsDisc(int);
-    void getRecommendationsOwnCont(int);
-    void getRecommendationsOwnDisc(int);
-
-
+    void displaySimilarOthers(int);
+    void displaySimilarOwn(int);
+    QMultiMap<float, QStringList> getRecommendations(QString user);
 
 private:
 
@@ -32,21 +29,20 @@ private:
     QList<int> validUTIDs;
     QList<bool> liked;
 
-    // indexed by UTId
-    char** highlows;
-
     // thresholds, indexed by Uid
     QList<float> thresholds;
 
     void setupDetailsStatsUTIDs();
     void setupHighLows();
     void setupThresholds();
-    QMultiMap<float, QStringList> getSimilarByScores(int UTid);
-    QMultiMap<int, QStringList> getSimilarByHYs(int UTid);
+    QMultiMap<float, int> getSimilarUTIDs(int UTid);
+    QMultiMap<float, QStringList> getSimilarTracks(int UTid);
+
     float calcLikesThreshold(QString user);
-    float calcLikesThresholdHelper(QString user, QMultiMap<float, int> utIDsByStddev, bool higher, bool lower, float threshold, int currentCorrect);
     int noCorrectlyClassified(QString user, float threshold);
     bool classify(int utID, float threshold);
+    bool listenedToTrack(QString, QString, QString);
+    QList<int> getSameTrackDiffUsers(int utID);
 
     void testing();
 

@@ -129,6 +129,7 @@
    <addaction name="actionStop"/>
    <addaction name="actionNext"/>
    <addaction name="actionShowRecords"/>
+   <addaction name="actionShow_Recommendations"/>
    <addaction name="separator"/>
   </widget>
   <widget class="QStatusBar" name="statusBar"/>
@@ -191,6 +192,11 @@
   <action name="actionShowRecords">
    <property name="text">
     <string>Show Records</string>
+   </property>
+  </action>
+  <action name="actionShow_Recommendations">
+   <property name="text">
+    <string>Show Recommendations</string>
    </property>
   </action>
  </widget>

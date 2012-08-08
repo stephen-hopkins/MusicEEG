@@ -98,7 +98,7 @@ void MainW::setupComboBox()
     }
     else {
         QStringList recOptions;
-        recOptions << "Own Cont" << "Other Cont" << "Own Disc" << "Other Disc";
+        recOptions << "Own Cont" << "Other Cont";
         ui->comboBox->insertItems(0, recOptions);
     }
 }
@@ -155,16 +155,10 @@ void MainW::tableClicked(int row, int /* column */)
     else {
         QString recMethod = ui->comboBox->currentText();
         if (recMethod == "Own Cont") {
-            recommender->getRecommendationsOwnCont(row);
+            recommender->displaySimilarOwn(row);
         }
         else if (recMethod == "Other Cont") {
-            recommender->getRecommendationsCont(row);
-        }
-        else if (recMethod == "Own Disc") {
-            recommender->getRecommendationsOwnDisc(row);
-        }
-        else if (recMethod == "Other Disc") {
-            recommender->getRecommendationsDisc(row);
+            recommender->displaySimilarOthers(row);
         }
     }
 }
@@ -191,6 +185,8 @@ void MainW::setupActions()
             this, SLOT(tableClicked(int,int)));
     connect(ui->actionShowRecords, SIGNAL(triggered()),
             this, SLOT(showRecords()));
+    connect(ui->actionShow_Recommendations, SIGNAL(triggered()),
+            this, SLOT(showRecs()));
      return;
  }
 
@@ -358,4 +354,38 @@ void MainW::setupMusicTable() {
 
     ui->musicTable->setHorizontalHeaderLabels(headers);
 }
+
+void MainW::showRecs()
+{
+    QMultiMap<float, QStringList> recs = recommender->getRecommendations(user);
+
+    ui->musicTable->clear();
+    QStringList headers;
+    headers << "Artist" << "Track" << "Score";
+    ui->musicTable->setColumnCount(3);
+    ui->musicTable->setRowCount(0);
+    ui->musicTable->setHorizontalHeaderLabels(headers);
+
+    if (recs.isEmpty()) {
+        return;
+    }
+
+    QMultiMap<float, QStringList>::const_iterator i;
+    int currentRow = 0;
+    for (i = recs.constEnd() - 1 ; ; i--) {
+        ui->musicTable->insertRow(currentRow);
+        QTableWidgetItem* artistItem = new QTableWidgetItem(i.value()[0]);
+        QTableWidgetItem* titleItem = new QTableWidgetItem(i.value()[1]);
+        QTableWidgetItem* scoreItem = new QTableWidgetItem(QString::number(i.key()));
+        ui->musicTable->setItem(currentRow, 0, artistItem);
+        ui->musicTable->setItem(currentRow, 1, titleItem);
+        ui->musicTable->setItem(currentRow, 2, scoreItem);
+        currentRow++;
+        if (i == recs.constBegin()) {
+            break;
+        }
+    }
+}
+
+
 
