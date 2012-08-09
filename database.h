@@ -20,6 +20,11 @@ public slots:
 
     void saveUserTrack (QString user, QString artist, QString track, QList< QList<float> > rawEmoData, QList< QList<float> > stats);
     void saveNewUser(QString user);
+    void saveUserLike(int utID, bool userLike);
+    void amendUserThreshold(QString user, float newThreshold);
+
+signals:
+    void newUserTrackSaved(int utID, QString user, QString artist, QString track, QList< QList<float> > stats);
 
 private:
     QSqlDatabase db;

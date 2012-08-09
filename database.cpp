@@ -73,7 +73,7 @@ void Database::saveUserTrack(QString user, QString artist, QString track, QList<
 
     // Add entry into main table UserTracks
     QSqlQuery addData(db);
-    addData.prepare(QString("INSERT INTO UserTracks VALUES(NULL, :user, :artist, :track, :length, :ave0, :ave1, :ave2, :ave3, :cha0, :cha1, :cha2, :cha3, :std0, :std1, :std2, :std3)"));
+    addData.prepare(QString("INSERT INTO UserTracks VALUES(NULL, :user, :artist, :track, :length, :ave0, :ave1, :ave2, :ave3, :cha0, :cha1, :cha2, :cha3, :std0, :std1, :std2, :std3, NULL)"));
     addData.bindValue(":user", user);
     addData.bindValue(":artist", artist);
     addData.bindValue(":track", track);
@@ -92,7 +92,7 @@ void Database::saveUserTrack(QString user, QString artist, QString track, QList<
         cerr << "Error adding new UserTrack to database" << endl;
     }
 
-    QString utID = addData.lastInsertId().toString();
+    int utID = addData.lastInsertId().toInt();
 
     // Insert raw data
     addData.prepare(QString("INSERT INTO RawData VALUES(%1, NULL, :engagement, :excitement, :frustration, :meditation)").arg(utID));
@@ -106,6 +106,8 @@ void Database::saveUserTrack(QString user, QString artist, QString track, QList<
             cerr << "Error adding record to RawData table" << endl;
         }
     }
+    emit newUserTrackSaved(utID, user, artist, track, stats);
+
     return;
 }
 
@@ -130,6 +132,24 @@ QSqlQuery Database::getAllRecords()
 QSqlQuery Database::getAllUsers()
 {
     QSqlQuery users(db);
-    users.exec("SELECT Uid, User FROM Users");
+    users.exec("SELECT Uid, User, LikeThreshold FROM Users");
     return users;
+}
+
+void Database::saveUserLike(int utID, bool userLike)
+{
+    QSqlQuery saveLike(db);
+    int liked = 0;
+    if (userLike) {
+        liked = 1;
+    }
+    saveLike.prepare(QString("UPDATE UserTracks SET Likes= %1 WHERE UTid= %2").arg(liked).arg(utID));
+    saveLike.exec();
+}
+
+void Database::amendUserThreshold(QString user, float newThreshold)
+{
+    QSqlQuery amend(db);
+    amend.prepare(QString("UPDATE Users SET LikeThreshold= %1 WHERE User= %2").arg(newThreshold).arg(user));
+    amend.exec();
 }

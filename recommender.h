@@ -17,6 +17,9 @@ public:
     void displaySimilarOwn(int);
     QMultiMap<float, QStringList> getRecommendations(QString user);
 
+public slots:
+    void addNewTrack(int utID, QString user, QString artist, QString track, QList< QList<float> > thisstats);
+
 private:
 
     Database* db;
@@ -31,6 +34,7 @@ private:
 
     // thresholds, indexed by Uid
     QList<float> thresholds;
+    QStringList users;
 
     void setupDetailsStatsUTIDs();
     void setupHighLows();
@@ -49,6 +53,8 @@ private:
 signals:
     void newRecs(QMultiMap<float, QStringList>);
     void newRecs(QMultiMap<int, QStringList>);
+    void userLikeConfirmation(int utID, bool userLike);
+    void newThreshold(QString user, float newThreshold);
 
 };
 

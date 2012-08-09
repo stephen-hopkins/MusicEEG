@@ -71,6 +71,14 @@ void MainW::connectSignalsSlots()
     connect(recommender, SIGNAL(newRecs(QMultiMap<int,QStringList>)),
              displayRecs, SLOT(updateTable(QMultiMap<int,QStringList>)));
 
+    connect(db, SIGNAL(newUserTrackSaved(int, QString, QString, QString,QList<QList<float> >)),
+            recommender, SLOT(addNewTrack(int, QString, QString, QString, QList<QList<float> >)));
+    connect(recommender, SIGNAL(userLikeConfirmation(int,bool)),
+            db, SLOT(saveUserLike(int,bool)));
+    connect(recommender, SIGNAL(newThreshold(QString,float)),
+            db, SLOT(amendUserThreshold(QString,float)));
+
+
 }
 
 

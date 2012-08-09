@@ -38,7 +38,7 @@ void Recommender::setupDetailsStatsUTIDs()
     QSqlQuery userTracks = db->getAllRecords();
     if (!userTracks.isActive()) {
         QMessageBox msgBox;
-        msgBox.setText("Fatal Error : Cannot retrieve records from database");
+        msgBox.setText("Fatal Error : Cannot retrieve usertrack records from database");
         msgBox.exec();
     }
 
@@ -84,18 +84,26 @@ void Recommender::setupThresholds()
 
     if (!usersQuery.isActive()) {
         QMessageBox msgBox;
-        msgBox.setText("Fatal Error : Cannot retrieve records from database");
+        msgBox.setText("Fatal Error : Cannot retrieve user records from database");
         msgBox.exec();
     }
     int currentIndex = 0;
+    QString emptyQString;
     while (usersQuery.next()) {
         int Uid = usersQuery.value(0).toInt();
         while (Uid > currentIndex) {
             thresholds.append(0.0);
+            users.append(emptyQString);
             currentIndex++;
         }
+
         QString user = usersQuery.value(1).toString();
-        thresholds.append(calcLikesThreshold(user));
+        float likeThreshold = usersQuery.value(2).toFloat();
+        if (likeThreshold == 0) {
+            likeThreshold = calcLikesThreshold(user);
+        }
+        thresholds.append(likeThreshold);
+        users.append(user);
         currentIndex++;
     }
 }
@@ -324,5 +332,69 @@ bool Recommender::listenedToTrack(QString user, QString artist, QString track)
         }
     }
     return false;
+}
+
+
+void Recommender::addNewTrack(int utID, QString user, QString artist, QString track, QList< QList<float> > thisstats)
+{
+    // update details, stats, validUTIDs
+    validUTIDs.append(utID);
+    while ( stats.size() < (utID - 1) ) {
+        QStringList emptyQSL;
+        details << emptyQSL;
+        QList<float> emptyQLF;
+        stats << emptyQLF;
+        liked << false;
+    }
+    QStringList deets;
+    deets << user << artist << track;
+    details.append(deets);
+    QList<float> statsToAdd;
+    for (int type = 0 ; type < 3 ; type++) {
+        for (int emo = 0 ; emo < 4 ; emo++) {
+            statsToAdd << thisstats[type][emo];
+        }
+    }
+    stats << statsToAdd;
+
+    // calc if user liked track, and check
+
+
+    int uID;
+    for (uID = 1 ; users[uID] != user ; uID++) {}
+    float threshold = thresholds[uID];
+    float stddevTotal = 0;
+    for (int n = 0 ; n < 4 ; n++) {
+        stddevTotal += thisstats[2][n];
+    }
+    bool estimateLike = false;
+    if (stddevTotal > threshold) {
+        estimateLike = true;
+    }
+
+    QMessageBox msgBox;
+    if (estimateLike) {
+        msgBox.setText("I think you liked this track.  Is that correct?");
+    }
+    else {
+        msgBox.setText("I think you didn't like this track.  Is that correct?");
+    }
+    msgBox.setStandardButtons(QMessageBox::Yes | QMessageBox::No);
+    msgBox.setDefaultButton(QMessageBox::Yes);
+    int ret = msgBox.exec();
+
+    bool userLike;
+    if (ret == QMessageBox::Yes) {
+        userLike = estimateLike;
+        liked << userLike;
+    }
+    else {
+        userLike = !estimateLike;
+        liked << userLike;
+        thresholds[uID] = calcLikesThreshold(user);
+        emit newThreshold(user, thresholds[uID]);
+
+    }
+    emit userLikeConfirmation(utID, userLike);
 }
 
