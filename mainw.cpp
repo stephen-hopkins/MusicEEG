@@ -12,6 +12,9 @@ MainW::MainW(QWidget *parent) :
 {
     ui->setupUi(this);
 
+    ui->musicTable->horizontalHeader()->setResizeMode(QHeaderView::Stretch);
+    ui->musicTable->verticalHeader()->setResizeMode(QHeaderView::Stretch);
+
     db = new Database();
     headset = new Headset();
     musicPlayer = new MusicPlayer();
@@ -19,7 +22,6 @@ MainW::MainW(QWidget *parent) :
     recommender = new Recommender(db);
     displayRecs = new DisplayRecs();
 
-    user = "NO USER SELECTED";
     currentTrack = 0;
     recordingMode = true;
 
@@ -31,6 +33,8 @@ MainW::MainW(QWidget *parent) :
 
     ui->timeLcd->display("00:00");
     setVolumeSlider(musicPlayer->getAudioOutputPtr());
+    startupGetUser();
+
 }
 
 void MainW::connectSignalsSlots()
@@ -51,6 +55,8 @@ void MainW::connectSignalsSlots()
             db, SLOT(saveUserTrack(QString,QString,QString,QList< QList<float> >, QList< QList<float> >)));
     connect(headset, SIGNAL(newUserTrack(QString,QString,QString,QList<QList<float> >,QList< QList<float> >)),
             displayEmotion, SLOT(updateWindow(QString,QString,QString,QList<QList<float> >,QList< QList<float> >)));
+    connect(this, SIGNAL(newUser(QString)),
+            db, SLOT(saveNewUser(QString)));
 
     connect(this, SIGNAL(startPlaying(Phonon::MediaSource)),
             musicPlayer, SLOT(startPlaying(Phonon::MediaSource)));
@@ -77,6 +83,8 @@ void MainW::connectSignalsSlots()
             db, SLOT(saveUserLike(int,bool)));
     connect(recommender, SIGNAL(newThreshold(QString,float)),
             db, SLOT(amendUserThreshold(QString,float)));
+    connect(db, SIGNAL(newUser(int,QString)),
+            recommender, SLOT(addUser(int,QString)));
 
 
 }
@@ -93,6 +101,22 @@ MainW::~MainW()
     delete recommender;
     delete displayRecs;
 }
+
+void MainW::startupGetUser()
+{
+    QStringList users = db->getUsers();
+    users.append("Add New User");
+    QString selectedUser = QInputDialog::getItem(this, "Select User", "User:", users, 0, false);
+    if (selectedUser != "Add New User") {
+        int index = users.indexOf(selectedUser);
+        ui->comboBox->setCurrentIndex(index);
+    }
+    else {
+        userSelectionMade(selectedUser);
+    }
+}
+
+
 
 void MainW::setupComboBox()
 {
@@ -266,12 +290,6 @@ void MainW::updateTable(QList<QStringList> metaData)
         ui->musicTable->setItem(currentRow, 3, yearItem);
 
     }
-
-    ui->musicTable->resizeColumnsToContents();
-
-    if (ui->musicTable->columnWidth(0) > 300) {
-        ui->musicTable->setColumnWidth(0, 300);
-    }
 }
 
 void MainW::userSelectionMade(QString userSelection)
@@ -282,13 +300,13 @@ void MainW::userSelectionMade(QString userSelection)
 
         while (!validUsernameChosen) {
             bool ok;
-            QString newUser = QInputDialog::getText(this, "New User", "Enter desired username:", QLineEdit::Normal, QDir::home().dirName(), &ok);
-            if (ok && !newUser.isEmpty() && !users.contains(newUser, Qt::CaseInsensitive)) {
-                user = newUser;
-                db->saveNewUser(newUser);
+            QString inputNewUser = QInputDialog::getText(this, "New User", "Enter desired username:", QLineEdit::Normal, QDir::home().dirName(), &ok);
+            if (ok && !inputNewUser.isEmpty() && !users.contains(inputNewUser, Qt::CaseInsensitive)) {
+                user = inputNewUser;
+                emit newUser(inputNewUser);
                 int itemsPre = ui->comboBox->count();
                 ui->comboBox->removeItem(itemsPre - 1);
-                ui->comboBox->addItem(newUser);
+                ui->comboBox->addItem(inputNewUser);
                 ui->comboBox->addItem("Add New User");
                 ui->comboBox->setCurrentIndex(itemsPre - 1);
                 validUsernameChosen = true;

@@ -25,6 +25,7 @@ public slots:
 
 signals:
     void newUserTrackSaved(int utID, QString user, QString artist, QString track, QList< QList<float> > stats);
+    void newUser(int uID, QString user);
 
 private:
     QSqlDatabase db;

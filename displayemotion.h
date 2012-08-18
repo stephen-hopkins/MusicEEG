@@ -14,9 +14,6 @@ class DisplayEmotion : public QDialog
 public:
     explicit DisplayEmotion(QWidget *parent = 0);
     ~DisplayEmotion();
-    void setRawData(QList< QList<float> > rawEmoData);
-    void setAverages(QList<float>);
-    void setChanges(QList<float>);
 
 public slots:
     void updateWindow(QString user, QString artist, QString track, QList< QList<float> > rawData, QList< QList<float> > stats);

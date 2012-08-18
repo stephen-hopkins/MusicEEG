@@ -115,7 +115,15 @@
     <addaction name="actionAbout"/>
     <addaction name="actionAboutQT"/>
    </widget>
+   <widget class="QMenu" name="menuShow">
+    <property name="title">
+     <string>Show</string>
+    </property>
+    <addaction name="actionShowRecords"/>
+    <addaction name="actionShow_Recommendations"/>
+   </widget>
    <addaction name="menuFile"/>
+   <addaction name="menuShow"/>
    <addaction name="menuAbout"/>
   </widget>
   <widget class="QToolBar" name="mainToolBar">
@@ -127,7 +135,6 @@
    </attribute>
    <addaction name="actionPlay"/>
    <addaction name="actionStop"/>
-   <addaction name="actionNext"/>
    <addaction name="actionShowRecords"/>
    <addaction name="actionShow_Recommendations"/>
    <addaction name="separator"/>
@@ -150,6 +157,9 @@
    </property>
   </action>
   <action name="actionNext">
+   <property name="enabled">
+    <bool>false</bool>
+   </property>
    <property name="text">
     <string>next</string>
    </property>
@@ -159,10 +169,10 @@
   </action>
   <action name="actionAddFiles">
    <property name="text">
-    <string>addFiles</string>
+    <string>Add Files</string>
    </property>
    <property name="toolTip">
-    <string>Add Tracks</string>
+    <string>Add new tracks</string>
    </property>
   </action>
   <action name="actionExit">

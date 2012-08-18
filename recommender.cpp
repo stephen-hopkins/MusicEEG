@@ -334,6 +334,26 @@ bool Recommender::listenedToTrack(QString user, QString artist, QString track)
     return false;
 }
 
+void Recommender::addUser(int uID, QString newUser)
+{
+    while (users.size() < (uID - 1)) {
+        users.append(QString());
+        thresholds.append(0.0);
+    }
+    users.append(newUser);
+    float aveThres = 0.0;
+    int noUsers = 0;
+    for (int n = 1 ; n < thresholds.size() ; n++) {
+        aveThres += thresholds[n];
+        if (thresholds[n] != 0.0) {
+            noUsers++;
+        }
+    }
+    aveThres /= noUsers;
+    thresholds.append(aveThres);
+    emit newThreshold(newUser, aveThres);
+}
+
 
 void Recommender::addNewTrack(int utID, QString user, QString artist, QString track, QList< QList<float> > thisstats)
 {
@@ -358,8 +378,6 @@ void Recommender::addNewTrack(int utID, QString user, QString artist, QString tr
     stats << statsToAdd;
 
     // calc if user liked track, and check
-
-
     int uID;
     for (uID = 1 ; users[uID] != user ; uID++) {}
     float threshold = thresholds[uID];

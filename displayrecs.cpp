@@ -6,6 +6,9 @@ DisplayRecs::DisplayRecs(QWidget *parent) :
     ui(new Ui::DisplayRecs)
 {
     ui->setupUi(this);
+
+    ui->tableWidget->horizontalHeader()->setResizeMode(QHeaderView::Stretch);
+    ui->tableWidget->verticalHeader()->setResizeMode(QHeaderView::Stretch);
 }
 
 DisplayRecs::~DisplayRecs()

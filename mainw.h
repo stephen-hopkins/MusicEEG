@@ -52,6 +52,7 @@ signals:
     void logEmoState();
     void stopRecording();
     void cancelRecording();
+    void newUser(QString);
 
     // goes to mediaplayer
     void startPlaying(Phonon::MediaSource);
@@ -80,6 +81,7 @@ private:
     void connectSignalsSlots();
     void updateTable(QList<QStringList>);
     void setupMusicTable();
+    void startupGetUser();
 
 };
 

@@ -19,6 +19,7 @@ public:
 
 public slots:
     void addNewTrack(int utID, QString user, QString artist, QString track, QList< QList<float> > thisstats);
+    void addUser(int uID, QString newUser);
 
 private:
 
@@ -52,7 +53,7 @@ private:
 
 signals:
     void newRecs(QMultiMap<float, QStringList>);
-    void newRecs(QMultiMap<int, QStringList>);
+   // void newRecs(QMultiMap<int, QStringList>);
     void userLikeConfirmation(int utID, bool userLike);
     void newThreshold(QString user, float newThreshold);
 

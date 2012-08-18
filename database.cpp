@@ -56,12 +56,13 @@ void Database::saveNewUser(QString user)
     }
     else {
         QSqlQuery addUser(db);
-        addUser.prepare(QString("INSERT INTO Users VALUES(NULL, '%1')").arg(user));
+        addUser.prepare(QString("INSERT INTO Users VALUES(NULL, '%1', NULL)").arg(user));
         if (!addUser.exec()) {
             cerr << "Error adding new User to Database";
         }
+        int uID = addUser.lastInsertId().toInt();
+        emit newUser(uID, user);
     }
-    return;
 }
 
 void Database::saveUserTrack(QString user, QString artist, QString track, QList< QList<float> > rawEmoData, QList< QList<float> > stats)
