@@ -53,7 +53,6 @@ private:
 
 signals:
     void newRecs(QMultiMap<float, QStringList>);
-   // void newRecs(QMultiMap<int, QStringList>);
     void userLikeConfirmation(int utID, bool userLike);
     void newThreshold(QString user, float newThreshold);
 

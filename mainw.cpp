@@ -12,8 +12,10 @@ MainW::MainW(QWidget *parent) :
 {
     ui->setupUi(this);
 
-    ui->musicTable->horizontalHeader()->setResizeMode(QHeaderView::Stretch);
-    ui->musicTable->verticalHeader()->setResizeMode(QHeaderView::Stretch);
+    ui->newTable->horizontalHeader()->setResizeMode(QHeaderView::Stretch);
+    ui->recTable->horizontalHeader()->setResizeMode(QHeaderView::Stretch);
+    ui->existingTable->horizontalHeader()->setResizeMode(QHeaderView::Stretch);
+
 
     db = new Database();
     headset = new Headset();
@@ -23,13 +25,16 @@ MainW::MainW(QWidget *parent) :
     displayRecs = new DisplayRecs();
 
     currentTrack = 0;
-    recordingMode = true;
-
     headsetTimer = new QTimer();
 
     setupActions();
     setupComboBox();
     connectSignalsSlots();
+    setupexistingTable();
+
+    ui->actionShowNewrecs->setEnabled(true);
+    ui->actionShowSimOwn->setEnabled(false);
+    ui->actionShowSimOthers->setEnabled(true);
 
     ui->timeLcd->display("00:00");
     setVolumeSlider(musicPlayer->getAudioOutputPtr());
@@ -73,9 +78,7 @@ void MainW::connectSignalsSlots()
             this, SLOT(continuePlaying()));
 
     connect(recommender, SIGNAL(newRecs(QMultiMap<float,QStringList>)),
-             displayRecs, SLOT(updateTable(QMultiMap<float,QStringList>)));
-    connect(recommender, SIGNAL(newRecs(QMultiMap<int,QStringList>)),
-             displayRecs, SLOT(updateTable(QMultiMap<int,QStringList>)));
+             this, SLOT(updaterecTableSim(QMultiMap<float,QStringList>)));
 
     connect(db, SIGNAL(newUserTrackSaved(int, QString, QString, QString,QList<QList<float> >)),
             recommender, SLOT(addNewTrack(int, QString, QString, QString, QList<QList<float> >)));
@@ -85,7 +88,6 @@ void MainW::connectSignalsSlots()
             db, SLOT(amendUserThreshold(QString,float)));
     connect(db, SIGNAL(newUser(int,QString)),
             recommender, SLOT(addUser(int,QString)));
-
 
 }
 
@@ -121,27 +123,14 @@ void MainW::startupGetUser()
 void MainW::setupComboBox()
 {
     ui->comboBox->clear();
-
-    if (recordingMode == true) {
-        QStringList users = db->getUsers();
-        users.append("Add New User");
-        ui->comboBox->insertItems(0, users);
-        user = ui->comboBox->currentText();
-    }
-    else {
-        QStringList recOptions;
-        recOptions << "Own Cont" << "Other Cont";
-        ui->comboBox->insertItems(0, recOptions);
-    }
+    QStringList users = db->getUsers();
+    users.append("Add New User");
+    ui->comboBox->insertItems(0, users);
+    user = ui->comboBox->currentText();
 }
 
 void MainW::addFiles()
  {
-    if (recordingMode == false) {
-        recordingMode = true;
-        setupMusicTable();
-        setupComboBox();
-    }
     sources.clear();
     QStringList files = QFileDialog::getOpenFileNames(this, tr("Select Music Files"),
                                                       QDesktopServices::storageLocation(QDesktopServices::MusicLocation), "MP3 Files (*.mp3)");
@@ -154,16 +143,15 @@ void MainW::addFiles()
         sources.append(source);
     }
     currentTrack = 0;
-    updateTable(musicPlayer->getMetaData(sources));
+    updatenewTable(musicPlayer->getMetaData(sources));
     ui->actionPlay->setEnabled(true);
     ui->actionStop->setEnabled(false);
  }
 
 void MainW::about()
  {
-     QMessageBox::information(this, tr("About Music Player"),
-         tr("The Music Player example shows how to use Phonon - the multimedia"
-            " framework that comes with Qt - to create a simple music player."));
+     QMessageBox::information(this, tr("About MusicEEG"),
+         tr("Designed and written by Stephen Hopkins"));
  }
 
 void MainW::tick(qint64 time)
@@ -172,28 +160,88 @@ void MainW::tick(qint64 time)
      ui->timeLcd->display(displayTime.toString("mm:ss"));
  }
 
-void MainW::tableClicked(int row, int /* column */)
+void MainW::newTableClicked(int row, int /* column */)
 {
-    if (recordingMode) {
-        emit stopPlaying();
-        emit cancelRecording();
+    emit stopPlaying();
+    emit cancelRecording();
 
-        if (row >= sources.size())
-            return;
+    if (row >= sources.size())
+        return;
 
-        currentTrack = row;
-        startButtonPressed();
+    currentTrack = row;
+    startButtonPressed();
+}
+
+
+void MainW::existingTableClicked(int row, int /* column*/)
+{
+    if (!ui->actionShowSimOwn->isEnabled()) {
+        recommender->displaySimilarOwn(row);
     }
-    else {
-        QString recMethod = ui->comboBox->currentText();
-        if (recMethod == "Own Cont") {
-            recommender->displaySimilarOwn(row);
-        }
-        else if (recMethod == "Other Cont") {
-            recommender->displaySimilarOthers(row);
-        }
+    else if (!ui->actionShowSimOthers->isEnabled()) {
+        recommender->displaySimilarOthers(row);
     }
 }
+
+void MainW::showSimOwnTriggered()
+{
+    ui->actionShowNewrecs->setEnabled(true);
+    ui->actionShowSimOwn->setEnabled(false);
+    ui->actionShowSimOthers->setEnabled(true);
+    recTableToSimilar();
+}
+
+void MainW::showSimOthersTriggered()
+{
+    ui->actionShowNewrecs->setEnabled(true);
+    ui->actionShowSimOwn->setEnabled(true);
+    ui->actionShowSimOthers->setEnabled(false);
+    recTableToSimilar();
+}
+
+void MainW::recTableToSimilar()
+{
+    ui->recTable->clear();
+    QStringList headers;
+    headers << "User" << "Artist" << "Track" << "Score";
+    ui->recTable->setColumnCount(4);
+    ui->recTable->setRowCount(0);
+    ui->recTable->setHorizontalHeaderLabels(headers);
+}
+
+void MainW::updaterecTableSim(QMultiMap<float, QStringList> recs)
+{
+    ui->recTable->clearContents();
+    QList<float> scores = recs.keys();
+    int currentRow = 0;
+
+    while (!scores.isEmpty()) {
+
+        float currentScore = scores.takeFirst();
+        QList<QStringList> uATs = recs.values(currentScore);
+
+        while (!uATs.isEmpty()) {
+            ui->recTable->insertRow(currentRow);
+            QStringList uAT = uATs.takeFirst();
+            for (int n = 0 ; n < 4 ; n++) {
+                QString text;
+                if (n != 3) {
+                    text = uAT[n];
+                }
+                else {
+                    text = QString::number(currentScore);
+                }
+                QTableWidgetItem* newItem = new QTableWidgetItem(text);
+                newItem->setFlags(Qt::ItemIsSelectable);
+                ui->recTable->setItem(currentRow, n, newItem);
+            }
+            currentRow++;
+        }
+
+    }
+}
+
+
 
 void MainW::setupActions()
  {
@@ -213,21 +261,26 @@ void MainW::setupActions()
             this, SLOT(about()));
     connect(ui->actionAboutQT, SIGNAL(triggered()),
             qApp, SLOT(aboutQt()));
-    connect(ui->musicTable, SIGNAL(cellDoubleClicked(int,int)),
-            this, SLOT(tableClicked(int,int)));
-    connect(ui->actionShowRecords, SIGNAL(triggered()),
-            this, SLOT(showRecords()));
-    connect(ui->actionShow_Recommendations, SIGNAL(triggered()),
-            this, SLOT(showRecs()));
+    connect(ui->newTable, SIGNAL(cellDoubleClicked(int,int)),
+            this, SLOT(newTableClicked(int,int)));
+    connect(ui->existingTable, SIGNAL(cellDoubleClicked(int,int)),
+            this, SLOT(existingTableClicked(int,int)));
+    connect(ui->actionShowNewrecs, SIGNAL(triggered()),
+            this, SLOT(showNewRecs()));
+    connect(ui->actionShowSimOwn, SIGNAL(triggered()),
+            this, SLOT(showSimOwnTriggered()));
+    connect(ui->actionShowSimOthers, SIGNAL(triggered()),
+            this, SLOT(showSimOthersTriggered()));
+
      return;
  }
 
 void MainW::startButtonPressed()
 {
-    QString artist = ui->musicTable->item(currentTrack,0)->text();
-    QString track = ui->musicTable->item(currentTrack,1)->text();
+    QString artist = ui->newTable->item(currentTrack,0)->text();
+    QString track = ui->newTable->item(currentTrack,1)->text();
 
-    ui->musicTable->selectRow(currentTrack);
+    ui->newTable->selectRow(currentTrack);
     ui->timeLcd->display("00:00");
     ui->actionPlay->setEnabled(false);
     ui->actionStop->setEnabled(true);
@@ -262,11 +315,11 @@ void MainW::stopButtonPressed()
     emit stopPlaying();
 }
 
-void MainW::updateTable(QList<QStringList> metaData)
+void MainW::updatenewTable(QList<QStringList> metaData)
 {   
     // clear current table
-    while (ui->musicTable->rowCount() != 0) {
-        ui->musicTable->removeRow(0);
+    while (ui->newTable->rowCount() != 0) {
+        ui->newTable->removeRow(0);
     }
 
     while (!metaData.isEmpty()) {
@@ -282,12 +335,12 @@ void MainW::updateTable(QList<QStringList> metaData)
         QTableWidgetItem *yearItem = new QTableWidgetItem(thisMetadata[3]);
         yearItem->setFlags(yearItem->flags() ^ Qt::ItemIsEditable);
 
-        int currentRow = ui->musicTable->rowCount();
-        ui->musicTable->insertRow(currentRow);
-        ui->musicTable->setItem(currentRow, 0, artistItem);
-        ui->musicTable->setItem(currentRow, 1, titleItem);
-        ui->musicTable->setItem(currentRow, 2, albumItem);
-        ui->musicTable->setItem(currentRow, 3, yearItem);
+        int currentRow = ui->newTable->rowCount();
+        ui->newTable->insertRow(currentRow);
+        ui->newTable->setItem(currentRow, 0, artistItem);
+        ui->newTable->setItem(currentRow, 1, titleItem);
+        ui->newTable->setItem(currentRow, 2, albumItem);
+        ui->newTable->setItem(currentRow, 3, yearItem);
 
     }
 }
@@ -333,14 +386,8 @@ void MainW::skipTrack()
     continuePlaying();
 }
 
-void MainW::showRecords()
+void MainW::setupexistingTable()
 {
-    recordingMode = false;
-    setupMusicTable();
-    setupComboBox();
-    ui->actionPlay->setEnabled(false);
-    ui->actionPlay->setEnabled(false);
-
     QSqlQuery userTracks = db->getAllRecords();
     if (!userTracks.isActive()) {
         QMessageBox msgBox;
@@ -350,47 +397,29 @@ void MainW::showRecords()
 
     int row = 0;
     while (userTracks.next()) {
-        ui->musicTable->insertRow(row);
+        ui->existingTable->insertRow(row);
         for (int n = 1 ; n < 16 ; n++) {
             QTableWidgetItem* newItem = new QTableWidgetItem(userTracks.value(n).toString());
             newItem->setFlags(newItem->flags() ^ Qt::ItemIsEditable);
-            ui->musicTable->setItem(row, n-1, newItem);
+            ui->existingTable->setItem(row, n-1, newItem);
         }
         row++;
     }
 }
 
-void MainW::setupMusicTable() {
-
-    ui->musicTable->clear();
-    QStringList headers;
-
-    if (recordingMode == true) {
-        ui->musicTable->setColumnCount(4);
-        ui->musicTable->setRowCount(0);
-        headers << "Artist" << "Track" << "Album" << "Year";
-
-    }
-    else {
-        ui->musicTable->setColumnCount(15);
-        ui->musicTable->setRowCount(0);
-        headers << "User" << "Artist" << "Track" << "MeanEng" << "MeanExc" << "MeanFrus" << "MeanMed";
-        headers << "ChaEng" << "ChaExc" << "ChaFrus" << "ChaMed" << "SDEng" << "SDExc" << "SDFrus" << "SDMed";
-    }
-
-    ui->musicTable->setHorizontalHeaderLabels(headers);
-}
-
-void MainW::showRecs()
+void MainW::showNewRecs()
 {
+    ui->actionShowNewrecs->setEnabled(false);
+    ui->actionShowSimOwn->setEnabled(true);
+    ui->actionShowSimOthers->setEnabled(true);
     QMultiMap<float, QStringList> recs = recommender->getRecommendations(user);
 
-    ui->musicTable->clear();
+    ui->recTable->clear();
     QStringList headers;
     headers << "Artist" << "Track" << "Score";
-    ui->musicTable->setColumnCount(3);
-    ui->musicTable->setRowCount(0);
-    ui->musicTable->setHorizontalHeaderLabels(headers);
+    ui->recTable->setColumnCount(3);
+    ui->recTable->setRowCount(0);
+    ui->recTable->setHorizontalHeaderLabels(headers);
 
     if (recs.isEmpty()) {
         return;
@@ -399,13 +428,13 @@ void MainW::showRecs()
     QMultiMap<float, QStringList>::const_iterator i;
     int currentRow = 0;
     for (i = recs.constEnd() - 1 ; ; i--) {
-        ui->musicTable->insertRow(currentRow);
+        ui->recTable->insertRow(currentRow);
         QTableWidgetItem* artistItem = new QTableWidgetItem(i.value()[0]);
         QTableWidgetItem* titleItem = new QTableWidgetItem(i.value()[1]);
         QTableWidgetItem* scoreItem = new QTableWidgetItem(QString::number(i.key()));
-        ui->musicTable->setItem(currentRow, 0, artistItem);
-        ui->musicTable->setItem(currentRow, 1, titleItem);
-        ui->musicTable->setItem(currentRow, 2, scoreItem);
+        ui->recTable->setItem(currentRow, 0, artistItem);
+        ui->recTable->setItem(currentRow, 1, titleItem);
+        ui->recTable->setItem(currentRow, 2, scoreItem);
         currentRow++;
         if (i == recs.constBegin()) {
             break;

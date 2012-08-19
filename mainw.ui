@@ -20,54 +20,210 @@
    <string>MainW</string>
   </property>
   <widget class="QWidget" name="centralWidget">
-   <layout class="QVBoxLayout" name="verticalLayout">
+   <layout class="QVBoxLayout" name="verticalLayout_4">
     <item>
-     <widget class="QTableWidget" name="musicTable">
-      <property name="autoScroll">
-       <bool>true</bool>
-      </property>
-      <property name="selectionMode">
-       <enum>QAbstractItemView::SingleSelection</enum>
-      </property>
-      <property name="selectionBehavior">
-       <enum>QAbstractItemView::SelectRows</enum>
-      </property>
-      <property name="columnCount">
-       <number>4</number>
-      </property>
-      <attribute name="horizontalHeaderDefaultSectionSize">
-       <number>100</number>
-      </attribute>
-      <attribute name="horizontalHeaderMinimumSectionSize">
-       <number>27</number>
-      </attribute>
-      <attribute name="verticalHeaderDefaultSectionSize">
-       <number>30</number>
-      </attribute>
-      <attribute name="verticalHeaderMinimumSectionSize">
-       <number>19</number>
-      </attribute>
-      <column>
-       <property name="text">
-        <string>Artist</string>
-       </property>
-      </column>
-      <column>
-       <property name="text">
-        <string>Track</string>
-       </property>
-      </column>
-      <column>
-       <property name="text">
-        <string>Album</string>
-       </property>
-      </column>
-      <column>
-       <property name="text">
-        <string>Date</string>
-       </property>
-      </column>
-     </widget>
+     <layout class="QHBoxLayout" name="horizontalLayout_2">
+      <item>
+       <layout class="QVBoxLayout" name="verticalLayout">
+        <item>
+         <widget class="QLabel" name="label_2">
+          <property name="text">
+           <string>Tracks to be listened too</string>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <widget class="QTableWidget" name="newTable">
+          <property name="autoScroll">
+           <bool>true</bool>
+          </property>
+          <property name="selectionMode">
+           <enum>QAbstractItemView::SingleSelection</enum>
+          </property>
+          <property name="selectionBehavior">
+           <enum>QAbstractItemView::SelectRows</enum>
+          </property>
+          <property name="showGrid">
+           <bool>false</bool>
+          </property>
+          <property name="columnCount">
+           <number>4</number>
+          </property>
+          <attribute name="horizontalHeaderDefaultSectionSize">
+           <number>100</number>
+          </attribute>
+          <attribute name="horizontalHeaderMinimumSectionSize">
+           <number>27</number>
+          </attribute>
+          <attribute name="verticalHeaderVisible">
+           <bool>false</bool>
+          </attribute>
+          <attribute name="verticalHeaderDefaultSectionSize">
+           <number>30</number>
+          </attribute>
+          <attribute name="verticalHeaderMinimumSectionSize">
+           <number>19</number>
+          </attribute>
+          <column>
+           <property name="text">
+            <string>Artist</string>
+           </property>
+          </column>
+          <column>
+           <property name="text">
+            <string>Track</string>
+           </property>
+          </column>
+          <column>
+           <property name="text">
+            <string>Album</string>
+           </property>
+          </column>
+          <column>
+           <property name="text">
+            <string>Date</string>
+           </property>
+          </column>
+         </widget>
+        </item>
+       </layout>
+      </item>
+      <item>
+       <layout class="QVBoxLayout" name="verticalLayout_3">
+        <item>
+         <widget class="QLabel" name="label_3">
+          <property name="text">
+           <string>Recommendations</string>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <widget class="QTableWidget" name="recTable">
+          <property name="autoScroll">
+           <bool>false</bool>
+          </property>
+          <property name="showGrid">
+           <bool>false</bool>
+          </property>
+          <attribute name="verticalHeaderVisible">
+           <bool>false</bool>
+          </attribute>
+          <column>
+           <property name="text">
+            <string>User</string>
+           </property>
+          </column>
+          <column>
+           <property name="text">
+            <string>Artist</string>
+           </property>
+          </column>
+          <column>
+           <property name="text">
+            <string>Track</string>
+           </property>
+          </column>
+          <column>
+           <property name="text">
+            <string>Score</string>
+           </property>
+          </column>
+         </widget>
+        </item>
+       </layout>
+      </item>
+     </layout>
+    </item>
+    <item>
+     <layout class="QVBoxLayout" name="verticalLayout_2">
+      <item>
+       <widget class="QLabel" name="label">
+        <property name="text">
+         <string>Existing Records</string>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QTableWidget" name="existingTable">
+        <property name="showGrid">
+         <bool>false</bool>
+        </property>
+        <attribute name="verticalHeaderVisible">
+         <bool>false</bool>
+        </attribute>
+        <column>
+         <property name="text">
+          <string>User</string>
+         </property>
+        </column>
+        <column>
+         <property name="text">
+          <string>Artist</string>
+         </property>
+        </column>
+        <column>
+         <property name="text">
+          <string>Track</string>
+         </property>
+        </column>
+        <column>
+         <property name="text">
+          <string>MeanEng</string>
+         </property>
+        </column>
+        <column>
+         <property name="text">
+          <string>MeanExc</string>
+         </property>
+        </column>
+        <column>
+         <property name="text">
+          <string>MeanFrus</string>
+         </property>
+        </column>
+        <column>
+         <property name="text">
+          <string>MeanMed</string>
+         </property>
+        </column>
+        <column>
+         <property name="text">
+          <string>ChaEng</string>
+         </property>
+        </column>
+        <column>
+         <property name="text">
+          <string>ChaExc</string>
+         </property>
+        </column>
+        <column>
+         <property name="text">
+          <string>ChaFrus</string>
+         </property>
+        </column>
+        <column>
+         <property name="text">
+          <string>StDevEng</string>
+         </property>
+        </column>
+        <column>
+         <property name="text">
+          <string>StDevExc</string>
+         </property>
+        </column>
+        <column>
+         <property name="text">
+          <string>StDevFrus</string>
+         </property>
+        </column>
+        <column>
+         <property name="text">
+          <string>StDevMed</string>
+         </property>
+        </column>
+       </widget>
+      </item>
+     </layout>
     </item>
     <item>
      <layout class="QHBoxLayout" name="horizontalLayout">
@@ -119,8 +275,9 @@
     <property name="title">
      <string>Show</string>
     </property>
-    <addaction name="actionShowRecords"/>
-    <addaction name="actionShow_Recommendations"/>
+    <addaction name="actionShowSimOwn"/>
+    <addaction name="actionShowSimOthers"/>
+    <addaction name="actionShowNewrecs"/>
    </widget>
    <addaction name="menuFile"/>
    <addaction name="menuShow"/>
@@ -135,8 +292,9 @@
    </attribute>
    <addaction name="actionPlay"/>
    <addaction name="actionStop"/>
-   <addaction name="actionShowRecords"/>
-   <addaction name="actionShow_Recommendations"/>
+   <addaction name="actionShowSimOwn"/>
+   <addaction name="actionShowSimOthers"/>
+   <addaction name="actionShowNewrecs"/>
    <addaction name="separator"/>
   </widget>
   <widget class="QStatusBar" name="statusBar"/>
@@ -199,14 +357,28 @@
     <string>About QT</string>
    </property>
   </action>
-  <action name="actionShowRecords">
+  <action name="actionShowSimOwn">
    <property name="text">
-    <string>Show Records</string>
+    <string>Show Similar (own)</string>
+   </property>
+   <property name="toolTip">
+    <string>show tracks that provoke a similar emotional response that you have listened to</string>
    </property>
   </action>
-  <action name="actionShow_Recommendations">
+  <action name="actionShowSimOthers">
    <property name="text">
-    <string>Show Recommendations</string>
+    <string>Show Similar (Others)</string>
+   </property>
+   <property name="toolTip">
+    <string>Show tracks that another user found similar</string>
+   </property>
+  </action>
+  <action name="actionShowNewrecs">
+   <property name="text">
+    <string>Show New Recommendations</string>
+   </property>
+   <property name="toolTip">
+    <string>Show recommendations based on your listening history</string>
    </property>
   </action>
  </widget>

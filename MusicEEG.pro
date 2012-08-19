@@ -33,8 +33,7 @@ HEADERS  += mainw.h \
     musicplayer.h \
     qcustomplot.h \
     displayemotion.h \
-    recommender.h \
-    displayrecs.h
+    recommender.h
 
 FORMS    += mainw.ui \
     displayemotion.ui \

@@ -35,7 +35,13 @@ private slots:
     // music player
     void addFiles();
     void about();
-    void tableClicked(int row, int column);
+    void newTableClicked(int row, int column);
+    void existingTableClicked(int row, int /* column*/);
+
+    void showNewRecs();
+    void showSimOthersTriggered();
+    void showSimOwnTriggered();
+
 
 public slots:
     void tick(qint64 time);
@@ -43,8 +49,8 @@ public slots:
     void setVolumeSlider(Phonon::AudioOutput*);
     void continuePlaying();
     void skipTrack();
-    void showRecords();
-    void showRecs();
+    void setupexistingTable();
+    void updaterecTableSim(QMultiMap<float, QStringList> recs);
 
 signals:
     // handles headset/database
@@ -67,7 +73,6 @@ private:
     int currentTrack;
     QList<Phonon::MediaSource> sources;
     QString user;
-    bool recordingMode;
 
     Database* db;
     Headset* headset;
@@ -79,9 +84,10 @@ private:
     void setupActions();
     void setupComboBox();
     void connectSignalsSlots();
-    void updateTable(QList<QStringList>);
-    void setupMusicTable();
+    void updatenewTable(QList<QStringList>);
     void startupGetUser();
+    void recTableToSimilar();
+
 
 };
 
