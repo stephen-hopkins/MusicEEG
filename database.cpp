@@ -151,6 +151,8 @@ void Database::saveUserLike(int utID, bool userLike)
 void Database::amendUserThreshold(QString user, float newThreshold)
 {
     QSqlQuery amend(db);
-    amend.prepare(QString("UPDATE Users SET LikeThreshold= %1 WHERE User= %2").arg(newThreshold).arg(user));
-    amend.exec();
+    amend.prepare(QString("UPDATE Users SET LikeThreshold= %1 WHERE User= '%2'").arg(newThreshold).arg(user));
+    if (!amend.exec()) {
+            cerr << "Error adding new LikeThreshold to database" << endl;
+    }
 }

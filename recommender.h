@@ -16,6 +16,9 @@ public:
     void displaySimilarOthers(int);
     void displaySimilarOwn(int);
     QMultiMap<float, QStringList> getRecommendations(QString user);
+    void saveThresholds();
+
+    void crossValidation();
 
 public slots:
     void addNewTrack(int utID, QString user, QString artist, QString track, QList< QList<float> > thisstats);
@@ -50,6 +53,8 @@ private:
     QList<int> getSameTrackDiffUsers(int utID);
 
     void testing();
+    float validCalcLikesThreshold(QList<float> scores, QList<bool> likes);
+    int validClassify(float thres, QList<float> scores, QList<bool> likes);
 
 signals:
     void newRecs(QMultiMap<float, QStringList>);

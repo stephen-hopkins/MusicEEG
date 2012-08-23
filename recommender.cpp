@@ -4,6 +4,8 @@
 #include <CMath>
 #include <QVariant>
 #include <iostream>
+#include <QTime>
+
 
 Recommender::Recommender(Database* d) : db(d)
 {
@@ -101,10 +103,27 @@ void Recommender::setupThresholds()
         float likeThreshold = usersQuery.value(2).toFloat();
         if (likeThreshold == 0) {
             likeThreshold = calcLikesThreshold(user);
+            emit newThreshold(user, likeThreshold);
         }
         thresholds.append(likeThreshold);
         users.append(user);
         currentIndex++;
+    }
+}
+
+void Recommender::saveThresholds()
+{
+    QSqlQuery usersQuery = db->getAllUsers();
+
+    while (usersQuery.next()) {
+        int Uid = usersQuery.value(0).toInt();
+
+        QString user = usersQuery.value(1).toString();
+        float likeThreshold = usersQuery.value(2).toFloat();
+        if (likeThreshold == 0) {
+            likeThreshold = thresholds[Uid];
+            emit newThreshold(user, likeThreshold);
+        }
     }
 }
 
@@ -415,4 +434,127 @@ void Recommender::addNewTrack(int utID, QString user, QString artist, QString tr
     }
     emit userLikeConfirmation(utID, userLike);
 }
+
+void Recommender::crossValidation()
+{
+    // build list of totals & likeds
+    QList<float> totStdDevs;
+    QList<bool> likes;
+
+    QList<int>::const_iterator utid;
+    for (utid = validUTIDs.constBegin() ; utid != validUTIDs.constEnd() ; utid++) {
+        float total = 0;
+        for (int n = 8 ; n < 12 ; n++) {
+            total += stats[*utid][n];
+        }
+        totStdDevs.append(total);
+        likes.append(liked[*utid]);
+    }
+
+    // split into 10 datasets
+    QList<QList<float> > scoreDataset;
+    QList<QList<bool> > likeDataset;
+
+    QTime time = QTime::currentTime();
+    qsrand((uint)time.msec());
+
+    int fold = 0;
+    scoreDataset.append(QList<float>());
+    likeDataset.append(QList<bool>());
+    while (!totStdDevs.isEmpty()) {
+        int rand = qrand() % totStdDevs.size();
+        if (scoreDataset[fold].size() == 5) {
+            fold++;
+            scoreDataset.append(QList<float>());
+            likeDataset.append(QList<bool>());
+        }
+        scoreDataset[fold].append(totStdDevs.takeAt(rand));
+        likeDataset[fold].append(likes.takeAt(rand));
+    }
+
+    int TP = 0;
+    int FN = 0;
+    int FP = 0;
+    int TN = 0;
+
+    // go through each fold, train on others, test
+    for (fold = 0 ; fold < 10 ; fold++) {
+        QList<float> trainingScores;
+        QList<float> testScores;
+        QList<bool> trainingLikes;
+        QList<bool> testLikes;
+        testScores = scoreDataset[fold];
+        testLikes = likeDataset[fold];
+        for (int n = 0 ; n < 10 ; n++) {
+            if (n != fold) {
+                trainingScores += scoreDataset[fold];
+                trainingLikes += likeDataset[fold];
+            }
+        }
+
+        float threshold = validCalcLikesThreshold(trainingScores, trainingLikes);
+
+        for (int n = 0 ; n < testScores.size() ; n++) {
+            if (testLikes[n]) {
+                if (testScores[n] > threshold) {
+                    TP++;
+                }
+                else {
+                    FN++;
+                }
+            }
+            else {
+                if (testScores[n] > threshold) {
+                    FP++;
+                }
+                else {
+                    TN++;
+                }
+            }
+        }
+    }
+    std::cout << "TP: " << TP << std::endl;
+    std::cout << "FN: " << FN << std::endl;
+    std::cout << "FP: " << FP << std::endl;
+    std::cout << "TN: " << TN << std::endl;
+
+    return;
+}
+
+float Recommender::validCalcLikesThreshold(QList<float> scores, QList<bool> likes)
+{
+    // create sorted list of scores
+    QMultiMap<float, bool> scoresLikes;
+    for (int n = 0 ; n < scores.size() ; n++) {
+        scoresLikes.insert(scores[n], likes[n]);
+    }
+
+    // add 0 and 1 to sorted list, and create second list of possible threshold values
+    scoresLikes.insert(0.0, false);
+    scoresLikes.insert(1.0, false);
+
+    QMap<int,float> noCorrectThresholds;
+
+    QMultiMap<float,bool>::const_iterator score = scoresLikes.constBegin();
+    score++;
+    while (score != scoresLikes.constEnd()) {
+        float thres = score.key() - ((score.key() - (score-1).key()) / 2);
+        noCorrectThresholds.insert(validClassify(thres, scores, likes), thres);
+        score++;
+    }
+    QMap<int, float>::const_iterator last = noCorrectThresholds.constEnd() - 1;
+    return last.value();
+}
+
+int Recommender::validClassify(float thres, QList<float> scores, QList<bool> likes)
+{
+    int noCorrect = 0;
+    for (int n = 0 ; n < scores.size() ; n++) {
+        if ((scores[n] > thres) == likes[n]) {
+            noCorrect++;
+        }
+    }
+    return noCorrect;
+}
+
 

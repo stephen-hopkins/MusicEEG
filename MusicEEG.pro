@@ -21,8 +21,7 @@ SOURCES += main.cpp\
     musicplayer.cpp \
     qcustomplot.cpp \
     displayemotion.cpp \
-    recommender.cpp \
-    displayrecs.cpp
+    recommender.cpp
 
 HEADERS  += mainw.h \
     headset.h \
@@ -36,8 +35,7 @@ HEADERS  += mainw.h \
     recommender.h
 
 FORMS    += mainw.ui \
-    displayemotion.ui \
-    displayrecs.ui
+    displayemotion.ui
 
 win32: LIBS += -L$$PWD -ledk
 win32: LIBS += -L$$PWD -ledk_utils

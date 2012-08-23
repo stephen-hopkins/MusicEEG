@@ -22,7 +22,6 @@ MainW::MainW(QWidget *parent) :
     musicPlayer = new MusicPlayer();
     displayEmotion = new DisplayEmotion();
     recommender = new Recommender(db);
-    displayRecs = new DisplayRecs();
 
     currentTrack = 0;
     headsetTimer = new QTimer();
@@ -38,6 +37,10 @@ MainW::MainW(QWidget *parent) :
 
     ui->timeLcd->display("00:00");
     setVolumeSlider(musicPlayer->getAudioOutputPtr());
+    //recommender->saveThresholds();
+
+    //recommender->crossValidation();
+
     startupGetUser();
 
 }
@@ -82,6 +85,8 @@ void MainW::connectSignalsSlots()
 
     connect(db, SIGNAL(newUserTrackSaved(int, QString, QString, QString,QList<QList<float> >)),
             recommender, SLOT(addNewTrack(int, QString, QString, QString, QList<QList<float> >)));
+    connect(db, SIGNAL(newUserTrackSaved(int,QString,QString,QString,QList<QList<float> >)),
+            this, SLOT(handleNewUserTrack(int,QString,QString,QString,QList<QList<float> >)));
     connect(recommender, SIGNAL(userLikeConfirmation(int,bool)),
             db, SLOT(saveUserLike(int,bool)));
     connect(recommender, SIGNAL(newThreshold(QString,float)),
@@ -101,7 +106,6 @@ MainW::~MainW()
     delete musicPlayer;
     delete displayEmotion;
     delete recommender;
-    delete displayRecs;
 }
 
 void MainW::startupGetUser()
@@ -368,6 +372,9 @@ void MainW::userSelectionMade(QString userSelection)
     }
     else {
         user = userSelection;
+        if (!ui->actionShowNewrecs->isEnabled()) {
+            showNewRecs();
+        }
     }
 }
 
@@ -388,6 +395,7 @@ void MainW::skipTrack()
 
 void MainW::setupexistingTable()
 {
+    ui->existingTable->clearContents();
     QSqlQuery userTracks = db->getAllRecords();
     if (!userTracks.isActive()) {
         QMessageBox msgBox;
@@ -442,5 +450,11 @@ void MainW::showNewRecs()
     }
 }
 
-
+void MainW::handleNewUserTrack(int, QString, QString, QString, QList<QList<float> >)
+{
+    setupexistingTable();
+    if (!ui->actionShowNewrecs->isEnabled()) {
+        showNewRecs();
+    }
+}
 

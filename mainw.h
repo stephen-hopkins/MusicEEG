@@ -12,7 +12,6 @@
 #include "musicplayer.h"
 #include "displayemotion.h"
 #include "recommender.h"
-#include "displayrecs.h"
 
 namespace Ui {
 class MainW;
@@ -46,11 +45,10 @@ private slots:
 public slots:
     void tick(qint64 time);
     void trackFinished();
-    void setVolumeSlider(Phonon::AudioOutput*);
     void continuePlaying();
     void skipTrack();
-    void setupexistingTable();
     void updaterecTableSim(QMultiMap<float, QStringList> recs);
+    void handleNewUserTrack(int, QString, QString, QString, QList<QList<float> >);
 
 signals:
     // handles headset/database
@@ -79,7 +77,6 @@ private:
     MusicPlayer* musicPlayer;
     DisplayEmotion* displayEmotion;
     Recommender* recommender;
-    DisplayRecs* displayRecs;
 
     void setupActions();
     void setupComboBox();
@@ -87,6 +84,8 @@ private:
     void updatenewTable(QList<QStringList>);
     void startupGetUser();
     void recTableToSimilar();
+    void setVolumeSlider(Phonon::AudioOutput*);
+    void setupexistingTable();
 
 
 };
