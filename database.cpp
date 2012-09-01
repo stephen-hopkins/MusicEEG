@@ -4,10 +4,12 @@
 #include <iostream>
 #include <QVariant>
 #include <QStringList>
+#include <QInputDialog>
+#include <QDir>
 
 using namespace std;
 
-Database::Database()
+Database::Database(QWidget* m)
 {
     db = QSqlDatabase::addDatabase("QSQLITE");
     db.setDatabaseName("Profiles.sqlite");
@@ -18,17 +20,26 @@ Database::Database()
 
     if (!dbInitialised()) {
         QSqlQuery init(db);
-        init.prepare("CREATE TABLE UserTracks(UTid integer primary key autoincrement, User text, Artist text, Track text, Length integer, MeanEng real, MeanExc real, MeanFrus real, MeanMed real, ChaEng real, ChaExc real, ChaFrus real, ChaMed real, SDEng real, SDExc real, SDFrus real, SDMed real)");
+        init.prepare("CREATE TABLE UserTracks(UTid integer primary key autoincrement, User text, Artist text, Track text, Length integer, MeanEng real, MeanExc real, MeanFrus real, MeanMed real, ChaEng real, ChaExc real, ChaFrus real, ChaMed real, SDEng real, SDExc real, SDFrus real, SDMed real, Likes integer)");
         if (!init.exec()) {
             cerr << "Error creating UserTracks table in database";
         }
-        init.prepare("CREATE TABLE Users(Uid integer primary key autoincrement, User text)");
+        init.prepare("CREATE TABLE Users(Uid integer primary key autoincrement, User text, LikeThreshold real)");
         if (!init.exec()) {
             cerr << "Error creating Users table in database";
         }
         init.prepare("CREATE TABLE RawData(UTid integer, RDid integer primary key autoincrement, Engagement real, Excitement real, Frustration real, Meditation real)");
         if (!init.exec()) {
             cerr << "Error creating RawData table in database";
+        }
+        bool validUsernameChosen = false;
+        while (!validUsernameChosen) {
+            bool ok;
+            QString inputNewUser = QInputDialog::getText(m, "New User", "Enter desired username:", QLineEdit::Normal, QDir::home().dirName(), &ok);
+            if (ok && !inputNewUser.isEmpty()) {
+                saveNewUser(inputNewUser);
+                validUsernameChosen = true;
+            }
         }
     }
 }

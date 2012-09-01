@@ -17,7 +17,7 @@ MainW::MainW(QWidget *parent) :
     ui->existingTable->horizontalHeader()->setResizeMode(QHeaderView::Stretch);
 
 
-    db = new Database();
+    db = new Database(this);
     headset = new Headset();
     musicPlayer = new MusicPlayer();
     displayEmotion = new DisplayEmotion();
@@ -130,7 +130,7 @@ void MainW::setupComboBox()
     QStringList users = db->getUsers();
     users.append("Add New User");
     ui->comboBox->insertItems(0, users);
-    user = ui->comboBox->currentText();
+    //user = ui->comboBox->currentText();
 }
 
 void MainW::addFiles()

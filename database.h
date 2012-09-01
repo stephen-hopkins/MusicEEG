@@ -10,7 +10,7 @@ class Database : public QObject
     Q_OBJECT
 
 public:
-    Database();
+    Database(QWidget* m);
     ~Database();
     QStringList getUsers();
     QSqlQuery getAllRecords();
